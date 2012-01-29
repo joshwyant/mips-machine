@@ -65,6 +65,7 @@ namespace MIPS.Architecture
 
         private void ExecuteRegisterInstruction(Instruction ins)
         {
+            // Register format instructions have Op-Code "0" and a Function Code.
             switch (ins.FunctionCode)
             {
                 // Shift Left Logical
