@@ -19,5 +19,10 @@ namespace MIPS.Architecture
             CPU = new CPU(this);
             Memory = new uint[256 * 1024 * memoryInMb];
         }
+
+        public void Run()
+        {
+            CPU.Start();
+        }
     }
 }
