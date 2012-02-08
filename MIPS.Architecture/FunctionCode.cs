@@ -103,7 +103,7 @@ namespace MIPS.Architecture
         /// </summary>
         or = 0x25,
         /// <summary>
-        /// Exclusive Or,
+        /// Exclusive Or
         /// </summary>
         xor = 0x26,
         /// <summary>

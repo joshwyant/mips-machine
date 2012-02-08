@@ -35,6 +35,20 @@ namespace MIPS.Architecture
         public ushort Immediate;
 
         /// <summary>
+        /// Gets the immediate word, sign-extended.
+        /// </summary>
+        public uint SignExtendedImmediate
+        {
+            get
+            {
+                if ((Immediate & 0x1000) != 0)
+                    return 0xFFFF0000U | Immediate;
+                else
+                    return (uint)Immediate;
+            }
+        }
+
+        /// <summary>
         /// The shift amount for shift instructions.
         /// </summary>
         public byte sa;

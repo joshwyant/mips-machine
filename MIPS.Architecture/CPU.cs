@@ -13,9 +13,9 @@ namespace MIPS.Architecture
         public uint[] RF { get; protected set; }
 
         /// <summary>
-        /// The Instruction Register; gets the current instruction. The address is IR*4.
+        /// The Instruction Register; gets or sets the current instruction. The address is IR*4.
         /// </summary>
-        public int IR { get; protected set; }
+        public int IR { get; set; }
 
         /// <summary>
         /// Gets or sets the high word of an arithmetic operation result.
@@ -45,21 +45,26 @@ namespace MIPS.Architecture
         {
             while (true)
             {
-                // Fetch the next instruction
-                var ins = new Instruction(Machine.Memory[IR++]);
+                Step();
+            }
+        }
 
-                if (ins.OpCode == OpCode.Register)
-                {
-                    ExecuteRegisterInstruction(ins);
-                }
-                else if (ins.OpCode == OpCode.j || ins.OpCode == OpCode.jal)
-                {
-                    throw new NotImplementedException();
-                }
-                else
-                {
-                    ExecuteImmediateInstruction(ins);
-                }
+        private void Step()
+        {
+            // Fetch the next instruction
+            var ins = new Instruction(Machine.Memory[IR++]);
+
+            if (ins.OpCode == OpCode.Register)
+            {
+                ExecuteRegisterInstruction(ins);
+            }
+            else if (ins.OpCode == OpCode.j || ins.OpCode == OpCode.jal)
+            {
+                throw new NotImplementedException();
+            }
+            else
+            {
+                ExecuteImmediateInstruction(ins);
             }
         }
 
@@ -100,7 +105,9 @@ namespace MIPS.Architecture
                     throw new NotImplementedException();
                 // System Call
                 case FunctionCode.syscall:
-                    throw new NotImplementedException();
+                    // TODO: For now, all syscalls are simulated here.
+                    Syscall();
+                    break;
                 // Move From High
                 case FunctionCode.mfhi:
                     RF[(int)ins.Rd] = High;
@@ -157,17 +164,14 @@ namespace MIPS.Architecture
                 // Add Unsigned
                 case FunctionCode.addu:
                     RF[(int)ins.Rd] = RF[(int)ins.Rs] + RF[(int)ins.Rt];
-                    // TODO: Generate exception in case of overflow.
                     break;
                 // Subtract
                 case FunctionCode.sub:
                     RF[(int)ins.Rd] = unchecked((uint)((int)RF[(int)ins.Rs] - (int)RF[(int)ins.Rt]));
-                    // TODO: Generate exception in case of overflow.
                     break;
                 // Subtract Unsigned
                 case FunctionCode.subu:
                     RF[(int)ins.Rd] = RF[(int)ins.Rs] - RF[(int)ins.Rt];
-                    // TODO: Generate exception in case of overflow.
                     break;
                 // And
                 case FunctionCode.and:
@@ -177,7 +181,7 @@ namespace MIPS.Architecture
                 case FunctionCode.or:
                     RF[(int)ins.Rd] = RF[(int)ins.Rs] | RF[(int)ins.Rt];
                     break;
-                // Exclusive Or,
+                // Exclusive Or
                 case FunctionCode.xor:
                     RF[(int)ins.Rd] = RF[(int)ins.Rs] ^ RF[(int)ins.Rt];
                     break;
@@ -205,7 +209,27 @@ namespace MIPS.Architecture
                     throw new NotImplementedException();
                 // Special branches with a branch code.
                 case OpCode.Branch:
-                    throw new NotImplementedException();
+                    switch (ins.BranchCode)
+                    {
+                        // Branch if Greater Than or Equal to Zero
+                        case BranchCode.bgez:
+                            if ((int)RF[(int)ins.Rs] > 0)
+                                IR += unchecked((int)ins.SignExtendedImmediate);
+                            break;
+                        // Branch if Greater Than or Equal to Zero, and Link
+                        case BranchCode.bgezal:
+                            throw new NotImplementedException();
+                        // Branch if Less than Zero
+                        case BranchCode.bltz:
+                            throw new NotImplementedException();
+                        // Branch if Less than Zero, and Link
+                        case BranchCode.bltzal:
+                            throw new NotImplementedException();
+                        default:
+                            // TODO: Invalid expression instruction?
+                            throw new NotImplementedException();
+                    }
+                    break;
                 // The Jump instruction
                 case OpCode.j:
                     throw new NotImplementedException();
@@ -217,19 +241,26 @@ namespace MIPS.Architecture
                     throw new NotImplementedException();
                 // Branch if Not Equal
                 case OpCode.bne:
-                    throw new NotImplementedException();
+                    if (RF[(int)ins.Rs] != RF[(int)ins.Rt])
+                        IR += unchecked((int)ins.SignExtendedImmediate);
+                    break;
                 // Branch if Less Than or Equal to Zero
                 case OpCode.blez:
-                    throw new NotImplementedException();
+                    if ((int)RF[(int)ins.Rs] <= 0)
+                        IR += unchecked((int)ins.SignExtendedImmediate);
+                    break;
                 // Branch if Greater than Zero
                 case OpCode.bgtz:
                     throw new NotImplementedException();
                 // Add Immediate
                 case OpCode.addi:
-                    throw new NotImplementedException();
+                    // TODO: Overflow exception
+                    RF[(int)ins.Rt] = RF[(int)ins.Rs] + ins.SignExtendedImmediate;
+                    break;
                 // Add Immediate Unsigned
                 case OpCode.addiu:
-                    throw new NotImplementedException();
+                    RF[(int)ins.Rt] = RF[(int)ins.Rs] + ins.SignExtendedImmediate;
+                    break;
                 // Set on Less Than Immediate
                 case OpCode.slti:
                     throw new NotImplementedException();
@@ -241,13 +272,15 @@ namespace MIPS.Architecture
                     throw new NotImplementedException();
                 // Or Immediate
                 case OpCode.ori:
-                    throw new NotImplementedException();
+                    RF[(int)ins.Rt] = RF[(int)ins.Rs] | ins.Immediate;
+                    break;
                 // Xor Immediate
                 case OpCode.xori:
                     throw new NotImplementedException();
                 // Load Upper Immediate
                 case OpCode.lui:
-                    throw new NotImplementedException();
+                    RF[(int)ins.Rt] = (uint)ins.Immediate << 16;
+                    break;
                 // Misc. System Instructions
                 case OpCode.System:
                     throw new NotImplementedException();
@@ -289,6 +322,71 @@ namespace MIPS.Architecture
                     throw new NotImplementedException();
                 default:
                     throw new NotImplementedException();
+            }
+        }
+
+        private void Syscall()
+        {
+            switch (RF[(int)Register.v0])
+            {
+                // Print Integer, a0 = number to be printed
+                case 1:
+                    Console.Write((int)RF[(int)Register.a0]);
+                    break;
+                // Print Float, a0 = number to be printed
+                case 2:
+                    throw new NotImplementedException();
+                // Print Double, a0 = number to be printed
+                case 3:
+                    throw new NotImplementedException();
+                // Print String, a0 = address of string in memory
+                case 4:
+                    int addr = (int)RF[(int)Register.a0];
+                    int offset = addr % 4;
+                    addr >>= 2;
+                    while (true)
+                    {
+                        uint word = Machine.Memory[addr];
+                        byte b = 0;
+                        while (offset < 4)
+                        {
+                            b = (byte)(word >> (offset * 8));
+                            if (b == 0)
+                                break;
+                            if (b == 10)
+                                Console.WriteLine();
+                            else
+                                Console.Write((char)b);
+                            offset++;
+                        }
+                        offset = 0;
+                        if (b == 0)
+                            break;
+                        addr++;
+                    }
+                    break;
+                // Read Integer, Number returned in v0
+                case 5:
+                    RF[(int)Register.v0] = (uint)int.Parse(Console.ReadLine());
+                    break;
+                // Read Float, Number returned in f0
+                case 6:
+                    throw new NotImplementedException();
+                // Read Double, Number returned in f0
+                case 7:
+                    throw new NotImplementedException();
+                // Read String, a0 = address of input buffer in memory, a1 = length of buffer (n)
+                case 8:
+                    throw new NotImplementedException();
+                // Sbrk, a0 = amount, address returned in v0
+                case 9:
+                    throw new NotImplementedException();
+                // Exit
+                case 10:
+                    Console.Write("\r\nPress any key to continue...");
+                    Console.ReadKey(true);
+                    Environment.Exit(0);
+                    break;
             }
         }
     }
