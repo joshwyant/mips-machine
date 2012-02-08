@@ -8,7 +8,7 @@ namespace MIPS.Architecture
     public class Machine
     {
         /// <summary>
-        /// Gets or sets an array of 32-bit integers representing the machine's memory.
+        /// Gets the machine's memory management unit.
         /// </summary>
         public MMU Memory { get; protected set; }
 

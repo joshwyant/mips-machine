@@ -17,8 +17,9 @@ namespace MIPS.Simulator
             Machine mips = new Machine(32); // Create a new MIPS machine with 32MB of RAM.
 
             // Map the data and text segments
-            mips.Memory.Map(0x00400000, 0x1000FFFC, 0x00000000); // Text segment
-            mips.Memory.Map(0x10010000, 0xFFFFFFFC, 0x00010000); // Data segment
+            mips.Memory.Map(0x00400000, 0x1000FFFC, 0x00800000); // Text segment
+            mips.Memory.Map(0x10010000, 0xFFFFFFFC, 0x00810000); // Data segment
+            mips.Memory.Map(0x80000000, 0x007FFFFC, 0x00100000); // Video memory
 
             // Fill the text segment
             // Example: mips.Memory[0] = new Instruction(OpCode.ori, Register.t5, Register.t2, Register.sp).Encode();
