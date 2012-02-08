@@ -213,7 +213,7 @@ namespace MIPS.Architecture
                     {
                         // Branch if Greater Than or Equal to Zero
                         case BranchCode.bgez:
-                            if ((int)RF[(int)ins.Rs] > 0)
+                            if ((int)RF[(int)ins.Rs] >= 0)
                                 IR += unchecked((int)ins.SignExtendedImmediate);
                             break;
                         // Branch if Greater Than or Equal to Zero, and Link
