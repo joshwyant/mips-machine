@@ -2,46 +2,84 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace MIPS.Architecture
 {
     public class CPU
     {
         /// <summary>
-        /// Gets the Register File
+        /// Gets the worker thread the CPU is running on.
         /// </summary>
-        public uint[] RF { get; protected set; }
+        public Thread WorkerThread { get; protected set; }
 
         /// <summary>
-        /// The Instruction Register; gets or sets the current instruction. The address is IR*4.
+        /// Gets the Register File
         /// </summary>
-        public int IR { get; set; }
+        public unsafe uint* RF;
+
+        /// <summary>
+        /// The Program Counter; gets or sets the address of the current instruction.
+        /// </summary>
+        public unsafe uint* PC;
+
+        /// <summary>
+        /// Gets or sets the current instruction
+        /// </summary>
+        public Instruction IR;
 
         /// <summary>
         /// Gets or sets the high word of an arithmetic operation result.
         /// </summary>
-        public uint High { get; set; }
+        public uint High;
 
         /// <summary>
         /// Gets or sets the low word of an arithmetic operation result.
         /// </summary>
-        public uint Low { get; set; }
+        public uint Low;
 
         /// <summary>
         /// Gets or sets the machine this CPU is a part of.
         /// </summary>
-        public Machine Machine { get; protected set; }
+        public Machine Machine;
+
+        /// <summary>
+        /// Occurs when a breakpoint is hit.
+        /// </summary>
+        public event EventHandler BreakpointHit;
+
+        /// <summary>
+        /// Gets or sets whether the CPU is executing in single-step mode.
+        /// </summary>
+        public bool SingleStep { get; set; }
+
+        /// <summary>
+        /// Occurs when the CPU makes a step in single-step mode.
+        /// </summary>
+        public event EventHandler CPUStep;
+
+        // If true, pause execution at the next opportunity.
+        bool _break = false;
+
+        public List<IntPtr> BreakPoints = new List<IntPtr>();
 
         /// <summary>
         /// Creates a new CPU. This constructor is only called inside the Machine constructor.
         /// </summary>
         internal CPU(Machine machine)
         {
-            RF = new uint[32];
+            WorkerThread = new Thread(Run);
+            unsafe
+            {
+                RF = (uint*)System.Runtime.InteropServices.Marshal.AllocHGlobal(32 * 4);
+                for (int i = 0; i < 32; i++)
+                    RF[i] = 0;
+            }
             Machine = machine;
         }
 
-        internal void Start()
+        // Runs on the worker thread
+        internal void Run()
         {
             while (true)
             {
@@ -49,53 +87,103 @@ namespace MIPS.Architecture
             }
         }
 
-        private void Step()
+        /// <summary>
+        /// Starts the CPU running
+        /// </summary>
+        public void Start()
+        {
+            WorkerThread.Start();
+        }
+
+        /// <summary>
+        /// Pauses CPU execution.
+        /// </summary>
+        public void Break()
+        {
+            _break = true;
+        }
+
+        /// <summary>
+        /// Resumes execution of the CPU.
+        /// </summary>
+        public void Resume()
+        {
+            _break = false;
+            WorkerThread.Resume();
+        }
+
+        private unsafe void Step()
         {
             // Fetch the next instruction
-            var ins = new Instruction(Machine.Memory[IR++]);
+            int pc = unchecked((int)PC++);
+            IR = new Instruction(Machine.Memory[pc >> 2]);
 
-            if (ins.OpCode == OpCode.Register)
+            // Single-step mode
+            if (SingleStep)
             {
-                ExecuteRegisterInstruction(ins);
+                // TODO: Invoke this in correct thread
+                if (CPUStep != null)
+                    CPUStep(this, null);
+                // Suspend execution of this thread
+                // System.Diagnostics.Debugger.Break();
+                // TODO: Use better method
+                Thread.CurrentThread.Suspend();
             }
-            else if (ins.OpCode == OpCode.j || ins.OpCode == OpCode.jal)
+
+            // Trigger breakpoints
+            if (_break || BreakPoints.Contains((IntPtr)pc))
+            {
+                // TODO: Invoke this in correct thread
+                if (BreakpointHit != null)
+                    BreakpointHit(this, null);
+                // Suspend execution of this thread
+                // System.Diagnostics.Debugger.Break();
+                // Todo: Use better method
+                Thread.CurrentThread.Suspend();
+            }
+
+            if (IR.OpCode == OpCode.Register)
+            {
+                ExecuteRegisterInstruction();
+            }
+            else if (IR.OpCode == OpCode.j || IR.OpCode == OpCode.jal)
             {
                 throw new NotImplementedException();
             }
             else
             {
-                ExecuteImmediateInstruction(ins);
+                ExecuteImmediateInstruction();
             }
         }
 
-        private void ExecuteRegisterInstruction(Instruction ins)
+        private unsafe void ExecuteRegisterInstruction()
         {
             // Register format instructions have Op-Code "0" and a Function Code.
-            switch (ins.FunctionCode)
+            switch (IR.FunctionCode)
             {
                 // Shift Left Logical
                 case FunctionCode.sll:
-                    RF[(int)ins.Rd] = RF[(int)ins.Rt] << ins.sa;
+                    RF[IR.Rd] = RF[IR.Rt] << IR.sa;
                     break;
                 // Shift Right Logical
                 case FunctionCode.srl:
-                    RF[(int)ins.Rd] = RF[(int)ins.Rt] >> ins.sa;
+                    RF[IR.Rd] = RF[IR.Rt] >> IR.sa;
                     break;
                 // Shift Right Arithmetic
                 case FunctionCode.sra:
-                    RF[(int)ins.Rd] = unchecked((uint)((int)RF[(int)ins.Rt] >> ins.sa));
+                    RF[IR.Rd] = unchecked((uint)((int)RF[IR.Rt] >> IR.sa));
                     break;
                 // Shift Left Logical Variable
                 case FunctionCode.sllv:
-                    RF[(int)ins.Rd] = RF[(int)ins.Rt] << (int)RF[(int)ins.Rs];
+                    RF[IR.Rd] = RF[IR.Rt] << (int)RF[IR.Rs];
                     break;
                 // Shift Right Logical Variable
                 case FunctionCode.srlv:
-                    RF[(int)ins.Rd] = RF[(int)ins.Rt] >> (int)RF[(int)ins.Rs];
+                    RF[IR.Rd] = RF[IR.Rt] >> (int)RF[IR.Rs];
                     break;
                 // Shift Right Arithmetic Variable
                 case FunctionCode.srav:
-                    RF[(int)ins.Rd] = unchecked((uint)((int)RF[(int)ins.Rt] >> (int)RF[(int)ins.Rs]));
+                    RF[IR.Rd] = unchecked((uint)((int)RF[IR.Rt] >> (int)RF[IR.Rs]));
                     break;
                 // Jump Register
                 case FunctionCode.jr:
@@ -110,24 +198,24 @@ namespace MIPS.Architecture
                     break;
                 // Move From High
                 case FunctionCode.mfhi:
-                    RF[(int)ins.Rd] = High;
+                    RF[IR.Rd] = High;
                     break;
                 // Move to High
                 case FunctionCode.mthi:
-                    High = RF[(int)ins.Rs];
+                    High = RF[IR.Rs];
                     break;
                 // Move From Low
                 case FunctionCode.mflo:
-                    RF[(int)ins.Rd] = Low;
+                    RF[IR.Rd] = Low;
                     break;
                 // Move To Low
                 case FunctionCode.mtlo:
-                    Low = RF[(int)ins.Rs];
+                    Low = RF[IR.Rs];
                     break;
                 // Multiply
                 case FunctionCode.mult:
                     {
-                        long result = (long)RF[(int)ins.Rs] * (long)RF[(int)ins.Rt];
+                        long result = (long)RF[IR.Rs] * (long)RF[IR.Rt];
                         Low = (uint)result;
                         High = (uint)(result >> 32);
                         break;
@@ -135,7 +223,7 @@ namespace MIPS.Architecture
                 // Multiply Unsigned
                 case FunctionCode.multu:
                     {
-                        ulong result = (ulong)RF[(int)ins.Rs] * (ulong)RF[(int)ins.Rt];
+                        ulong result = (ulong)RF[IR.Rs] * (ulong)RF[IR.Rt];
                         Low = (uint)result;
                         High = (uint)(result >> 32);
                         break;
@@ -144,7 +232,7 @@ namespace MIPS.Architecture
                 case FunctionCode.div:
                     {
                         long result;
-                        Low = (uint)Math.DivRem((long)unchecked((uint)RF[(int)ins.Rs]), unchecked((int)(long)RF[(int)ins.Rs]), out result);
+                        Low = (uint)Math.DivRem((long)unchecked((uint)RF[IR.Rs]), unchecked((int)(long)RF[IR.Rs]), out result);
                         High = (uint)result;
                         break;
                     }
@@ -152,42 +240,42 @@ namespace MIPS.Architecture
                 case FunctionCode.divu:
                     {
                         long result;
-                        Low = (uint)Math.DivRem((long)RF[(int)ins.Rs], (long)RF[(int)ins.Rs], out result);
+                        Low = (uint)Math.DivRem((long)RF[IR.Rs], (long)RF[IR.Rs], out result);
                         High = (uint)result;
                         break;
                     }
                 // Add
                 case FunctionCode.add:
-                    RF[(int)ins.Rd] = unchecked((uint)((int)RF[(int)ins.Rs] + (int)RF[(int)ins.Rt]));
+                    RF[IR.Rd] = unchecked((uint)((int)RF[IR.Rs] + (int)RF[IR.Rt]));
                     // TODO: Generate exception in case of overflow.
                     break;
                 // Add Unsigned
                 case FunctionCode.addu:
-                    RF[(int)ins.Rd] = RF[(int)ins.Rs] + RF[(int)ins.Rt];
+                    RF[IR.Rd] = RF[IR.Rs] + RF[IR.Rt];
                     break;
                 // Subtract
                 case FunctionCode.sub:
-                    RF[(int)ins.Rd] = unchecked((uint)((int)RF[(int)ins.Rs] - (int)RF[(int)ins.Rt]));
+                    RF[IR.Rd] = unchecked((uint)((int)RF[IR.Rs] - (int)RF[IR.Rt]));
                     break;
                 // Subtract Unsigned
                 case FunctionCode.subu:
-                    RF[(int)ins.Rd] = RF[(int)ins.Rs] - RF[(int)ins.Rt];
+                    RF[IR.Rd] = RF[IR.Rs] - RF[IR.Rt];
                     break;
                 // And
                 case FunctionCode.and:
-                    RF[(int)ins.Rd] = RF[(int)ins.Rs] & RF[(int)ins.Rt];
+                    RF[IR.Rd] = RF[IR.Rs] & RF[IR.Rt];
                     break;
                 // Or
                 case FunctionCode.or:
-                    RF[(int)ins.Rd] = RF[(int)ins.Rs] | RF[(int)ins.Rt];
+                    RF[IR.Rd] = RF[IR.Rs] | RF[IR.Rt];
                     break;
                 // Exclusive Or
                 case FunctionCode.xor:
-                    RF[(int)ins.Rd] = RF[(int)ins.Rs] ^ RF[(int)ins.Rt];
+                    RF[IR.Rd] = RF[IR.Rs] ^ RF[IR.Rt];
                     break;
                 // Nor
                 case FunctionCode.nor:
-                    RF[(int)ins.Rd] = ~(RF[(int)ins.Rs] | RF[(int)ins.Rt]);
+                    RF[IR.Rd] = ~(RF[IR.Rs] | RF[IR.Rt]);
                     break;
                 // Set on Less Than
                 case FunctionCode.slt:
@@ -200,21 +288,21 @@ namespace MIPS.Architecture
             }
         }
 
-        private void ExecuteImmediateInstruction(Instruction ins)
+        private unsafe void ExecuteImmediateInstruction()
         {
-            switch (ins.OpCode)
+            switch (IR.OpCode)
             {
                 // The default Op-Code that deals with registers and is defined by a function code.
                 case OpCode.Register:
                     throw new NotImplementedException();
                 // Special branches with a branch code.
                 case OpCode.Branch:
-                    switch (ins.BranchCode)
+                    switch (IR.BranchCode)
                     {
                         // Branch if Greater Than or Equal to Zero
                         case BranchCode.bgez:
-                            if ((int)RF[(int)ins.Rs] >= 0)
-                                IR += unchecked((int)ins.SignExtendedImmediate);
+                            if ((int)RF[IR.Rs] >= 0)
+                                PC += unchecked((int)IR.SignExtendedImmediate);
                             break;
                         // Branch if Greater Than or Equal to Zero, and Link
                         case BranchCode.bgezal:
@@ -241,13 +329,13 @@ namespace MIPS.Architecture
                     throw new NotImplementedException();
                 // Branch if Not Equal
                 case OpCode.bne:
-                    if (RF[(int)ins.Rs] != RF[(int)ins.Rt])
-                        IR += unchecked((int)ins.SignExtendedImmediate);
+                    if (RF[IR.Rs] != RF[IR.Rt])
+                        PC += unchecked(IR.SignExtendedImmediate);
                     break;
                 // Branch if Less Than or Equal to Zero
                 case OpCode.blez:
-                    if ((int)RF[(int)ins.Rs] <= 0)
-                        IR += unchecked((int)ins.SignExtendedImmediate);
+                    if ((int)RF[IR.Rs] <= 0)
+                        PC += unchecked(IR.SignExtendedImmediate);
                     break;
                 // Branch if Greater than Zero
                 case OpCode.bgtz:
@@ -255,11 +343,11 @@ namespace MIPS.Architecture
                 // Add Immediate
                 case OpCode.addi:
                     // TODO: Overflow exception
-                    RF[(int)ins.Rt] = RF[(int)ins.Rs] + ins.SignExtendedImmediate;
+                    RF[IR.Rt] = RF[IR.Rs] + IR.SignExtendedImmediate;
                     break;
                 // Add Immediate Unsigned
                 case OpCode.addiu:
-                    RF[(int)ins.Rt] = RF[(int)ins.Rs] + ins.SignExtendedImmediate;
+                    RF[IR.Rt] = RF[IR.Rs] + IR.SignExtendedImmediate;
                     break;
                 // Set on Less Than Immediate
                 case OpCode.slti:
@@ -272,14 +360,14 @@ namespace MIPS.Architecture
                     throw new NotImplementedException();
                 // Or Immediate
                 case OpCode.ori:
-                    RF[(int)ins.Rt] = RF[(int)ins.Rs] | ins.Immediate;
+                    RF[IR.Rt] = RF[IR.Rs] | IR.Immediate;
                     break;
                 // Xor Immediate
                 case OpCode.xori:
                     throw new NotImplementedException();
                 // Load Upper Immediate
                 case OpCode.lui:
-                    RF[(int)ins.Rt] = (uint)ins.Immediate << 16;
+                    RF[IR.Rt] = (uint)IR.Immediate << 16;
                     break;
                 // Misc. System Instructions
                 case OpCode.System:
@@ -325,7 +413,7 @@ namespace MIPS.Architecture
             }
         }
 
-        private void Syscall()
+        private unsafe void Syscall()
         {
             switch (RF[(int)Register.v0])
             {

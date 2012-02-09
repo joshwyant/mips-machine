@@ -15,19 +15,19 @@ namespace MIPS.Architecture
         /// <summary>
         /// The first source operand register for register- or immediate-format instructions.
         /// </summary>
-        public Register Rs;
+        public int Rs;
 
         /// <summary>
         /// The second source operand register for register- or immediate-format instructions.
         /// </summary>
-        public Register Rt;
+        public int Rt;
 
-        public BranchCode BranchCode { get { return (BranchCode)Rt; } set { Rt = (Register)value; } }
+        public BranchCode BranchCode { get { return (BranchCode)Rt; } set { Rt = (int)value; } }
 
         /// <summary>
         /// The destination register for a register-based instruction.
         /// </summary>
-        public Register Rd;
+        public int Rd;
 
         /// <summary>
         /// The immediate word.
@@ -117,14 +117,14 @@ namespace MIPS.Architecture
             if (((int)OpCode & 0x3E) != 2)
             {
                 // This is not a jump instruciton, so there are source registers.
-                Rt = (Register)((word >> 16) & 0x1F);
-                Rs = (Register)((word >> 21) & 0x1F);
+                Rt = (int)((word >> 16) & 0x1F);
+                Rs = (int)((word >> 21) & 0x1F);
 
                 // If this is a register format instruction, there is a destination register and a function code.
                 if (OpCode == OpCode.Register)
                 {
                     FunctionCode = (FunctionCode)(word & 0x3F);
-                    Rd = (Register)((word >> 11) & 0x1F);
+                    Rd = (int)((word >> 11) & 0x1F);
 
                     // If this is a shift instruction, there is also a shift amount field.
                     if ((int)OpCode < 4)
@@ -154,9 +154,9 @@ namespace MIPS.Architecture
         public Instruction(OpCode opCode, Register rs, Register rt, Register rd)
         {
             OpCode = opCode;
-            Rs = rs;
-            Rt = rt;
-            Rd = rd;
+            Rs = (int)rs;
+            Rt = (int)rt;
+            Rd = (int)rd;
             Immediate = 0;
             sa = 0;
             FunctionCode = 0;
@@ -166,9 +166,9 @@ namespace MIPS.Architecture
         public Instruction(OpCode opCode, Register rs, Register rd)
         {
             OpCode = opCode;
-            Rs = rs;
+            Rs = (int)rs;
             Rt = 0;
-            Rd = rd;
+            Rd = (int)rd;
             sa = 0;
             Immediate = 0;
             FunctionCode = 0;
@@ -179,8 +179,8 @@ namespace MIPS.Architecture
         {
             OpCode = OpCode.Register;
             Rs = 0;
-            Rt = rt;
-            Rd = rd;
+            Rt = (int)rt;
+            Rd = (int)rd;
             sa = (byte)shiftAmount;
             Immediate = 0;
             FunctionCode = shiftCode;
@@ -190,8 +190,8 @@ namespace MIPS.Architecture
         public Instruction(FunctionCode functionCode, Register rs, Register rt, ushort immediate)
         {
             OpCode = OpCode.Register;
-            Rs = rs;
-            Rt = rt;
+            Rs = (int)rs;
+            Rt = (int)rt;
             Rd = 0;
             sa = 0;
             Immediate = immediate;
@@ -202,7 +202,7 @@ namespace MIPS.Architecture
         public Instruction(FunctionCode functionCode, Register rs, ushort immediate)
         {
             OpCode = OpCode.Register;
-            Rs = rs;
+            Rs = (int)rs;
             Rt = 0;
             Rd = 0;
             sa = 0;
@@ -214,8 +214,8 @@ namespace MIPS.Architecture
         public Instruction(FunctionCode functionCode, Register rs, Register rt)
         {
             OpCode = OpCode.Register;
-            Rs = rs;
-            Rt = rt;
+            Rs = (int)rs;
+            Rt = (int)rt;
             Rd = 0;
             Immediate = 0;
             sa = 0;
@@ -226,7 +226,7 @@ namespace MIPS.Architecture
         public Instruction(FunctionCode functionCode, Register rs)
         {
             OpCode = OpCode.Register;
-            Rs = rs;
+            Rs = (int)rs;
             Rt = 0;
             Rd = 0;
             Immediate = 0;

@@ -22,7 +22,7 @@ namespace MIPS.Architecture
 
         public void Run()
         {
-            CPU.Start();
+            CPU.Run();
         }
     }
 }

@@ -7,8 +7,8 @@ namespace MIPS.Architecture
 {
     public class MMU
     {
-        public List<Tuple<int, int, int>> Mappings { get; set; }
-        public uint[] RawMemory { get; set; }
+        public List<Tuple<int, int, int>> Mappings;
+        public unsafe uint* RawMemory;
 
         /// <summary>
         /// Gets the word at the address index * 4.
@@ -18,17 +18,26 @@ namespace MIPS.Architecture
         {
             get
             {
-                return RawMemory[Mappings.Where(m => m.Item1 <= index && m.Item2 >= index).Select(m => index - m.Item1 + m.Item3).Single()];
+                unsafe
+                {
+                    return RawMemory[Mappings.Where(m => m.Item1 <= index && m.Item2 >= index).Select(m => index - m.Item1 + m.Item3).Single()];
+                }
             }
             set
             {
-                RawMemory[Mappings.Where(m => m.Item1 <= index && m.Item2 >= index).Select(m => index - m.Item1 + m.Item3).Single()] = value;
+                unsafe
+                {
+                    RawMemory[Mappings.Where(m => m.Item1 <= index && m.Item2 >= index).Select(m => index - m.Item1 + m.Item3).Single()] = value;
+                }
             }
         }
 
         public MMU(int memoryInMB)
         {
-            RawMemory = new uint[memoryInMB << 18];
+            unsafe
+            {
+                RawMemory = (uint*)System.Runtime.InteropServices.Marshal.AllocHGlobal(memoryInMB << 20);
+            }
             Mappings = new List<Tuple<int, int, int>>();
         }
 

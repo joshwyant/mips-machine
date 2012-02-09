@@ -24,7 +24,7 @@ namespace MIPS.Simulator
             // Fill the text segment
             // Example: mips.Memory[0] = new Instruction(OpCode.ori, Register.t5, Register.t2, Register.sp).Encode();
             var addr = 0x00400000 >> 2;
-            mips.Memory[addr++] = 0x24020004;  // addiu $2,$0,4       
+            mips.Memory[addr++] = 0x24020004;  // addiu $2,$0,4   
             mips.Memory[addr++] = 0x3c011001;  // lui $1,4097         
             mips.Memory[addr++] = 0x34240000;  // ori $4,$1,0
             mips.Memory[addr++] = 0x0000000c;  // syscall             
@@ -83,7 +83,10 @@ namespace MIPS.Simulator
             mips.Memory[addr++] = 0x00002a2a;
 
             // Set the Program Counter
-            mips.CPU.IR = 0x00400000 >> 2;
+            unsafe
+            {
+                mips.CPU.PC = (uint*)0x00400000;
+            }
 
             mips.Run();
         }
