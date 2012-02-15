@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using MIPS.Architecture;
+using MIPS.Debugger;
+using System.Windows.Forms;
 
 namespace MIPS.Simulator
 {
@@ -88,7 +90,8 @@ namespace MIPS.Simulator
                 mips.CPU.PC = (uint*)0x00400000;
             }
 
-            mips.Run();
+            Application.EnableVisualStyles();
+            Application.Run(new DebugForm(mips));
         }
     }
 }

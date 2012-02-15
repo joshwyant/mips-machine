@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MIPS.Simulator", "MIPS.Simu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MIPS.Architecture", "MIPS.Architecture\MIPS.Architecture.csproj", "{4047CF76-8DA8-4FA6-A2C7-D73B1D1DB833}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MIPS.Debugger", "MIPS.Debugger\MIPS.Debugger.csproj", "{7075F0FA-B84D-457D-9B41-9B87EE9187D1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,16 @@ Global
 		{4047CF76-8DA8-4FA6-A2C7-D73B1D1DB833}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{4047CF76-8DA8-4FA6-A2C7-D73B1D1DB833}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{4047CF76-8DA8-4FA6-A2C7-D73B1D1DB833}.Release|x86.ActiveCfg = Release|Any CPU
+		{7075F0FA-B84D-457D-9B41-9B87EE9187D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7075F0FA-B84D-457D-9B41-9B87EE9187D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7075F0FA-B84D-457D-9B41-9B87EE9187D1}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{7075F0FA-B84D-457D-9B41-9B87EE9187D1}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{7075F0FA-B84D-457D-9B41-9B87EE9187D1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7075F0FA-B84D-457D-9B41-9B87EE9187D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7075F0FA-B84D-457D-9B41-9B87EE9187D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7075F0FA-B84D-457D-9B41-9B87EE9187D1}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{7075F0FA-B84D-457D-9B41-9B87EE9187D1}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{7075F0FA-B84D-457D-9B41-9B87EE9187D1}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

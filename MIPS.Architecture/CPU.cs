@@ -58,6 +58,11 @@ namespace MIPS.Architecture
         /// </summary>
         public event EventHandler CPUStep;
 
+        /// <summary>
+        /// Exit Syscall
+        /// </summary>
+        public event EventHandler ExitSyscall;
+
         // If true, pause execution at the next opportunity.
         bool _break = false;
 
@@ -127,7 +132,7 @@ namespace MIPS.Architecture
                 // Suspend execution of this thread
                 // System.Diagnostics.Debugger.Break();
                 // TODO: Use better method
-                Thread.CurrentThread.Suspend();
+                WorkerThread.Suspend();
             }
 
             // Trigger breakpoints
@@ -139,7 +144,7 @@ namespace MIPS.Architecture
                 // Suspend execution of this thread
                 // System.Diagnostics.Debugger.Break();
                 // Todo: Use better method
-                Thread.CurrentThread.Suspend();
+                WorkerThread.Suspend();
             }
 
             if (IR.OpCode == OpCode.Register)
@@ -471,9 +476,9 @@ namespace MIPS.Architecture
                     throw new NotImplementedException();
                 // Exit
                 case 10:
-                    Console.Write("\r\nPress any key to continue...");
-                    Console.ReadKey(true);
-                    Environment.Exit(0);
+                    if (ExitSyscall != null)
+                        ExitSyscall(this, null);
+                    // TODO: Halt
                     break;
             }
         }
