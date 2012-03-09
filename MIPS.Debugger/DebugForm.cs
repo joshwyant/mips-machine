@@ -40,5 +40,10 @@ namespace MIPS.Debugger
             Machine.CPU.SingleStep = true;
             Machine.Run();
         }
+
+        private void toolStripButtonPause_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.ComponentModel;
 
 namespace MIPS.Architecture
 {
@@ -44,6 +45,11 @@ namespace MIPS.Architecture
         public Machine Machine;
 
         /// <summary>
+        /// Thread synchronization for CPU traps.
+        /// </summary>
+        private ManualResetEvent TrapSync = new ManualResetEvent(false);
+
+        /// <summary>
         /// Occurs when a breakpoint is hit.
         /// </summary>
         public event EventHandler BreakpointHit;
@@ -67,6 +73,25 @@ namespace MIPS.Architecture
         bool _break = false;
 
         public List<IntPtr> BreakPoints = new List<IntPtr>();
+
+        /// <summary>
+        /// Helper method to raise an event on the correct thread
+        /// </summary>
+        private void RaiseEventOnUIThread(Delegate e, params object[] args)
+        {
+            foreach (Delegate d in e.GetInvocationList())
+            {
+                ISynchronizeInvoke syncObj = d.Target as ISynchronizeInvoke;
+                if (syncObj == null)
+                {
+                    d.DynamicInvoke(args);
+                }
+                else
+                {
+                    syncObj.EndInvoke(syncObj.BeginInvoke(d, args));
+                }
+            }
+        }
 
         /// <summary>
         /// Creates a new CPU. This constructor is only called inside the Machine constructor.
@@ -93,11 +118,17 @@ namespace MIPS.Architecture
         }
 
         /// <summary>
-        /// Starts the CPU running
+        /// Starts the CPU running, or resumes
         /// </summary>
         public void Start()
         {
-            WorkerThread.Start();
+            // Sets the trap sync, ready to break
+            TrapSync.Set();
+
+            if (!WorkerThread.IsAlive)
+            {
+                WorkerThread.Start();
+            }
         }
 
         /// <summary>
@@ -105,7 +136,7 @@ namespace MIPS.Architecture
         /// </summary>
         public void Break()
         {
-            _break = true;
+            TrapSync.Reset();
         }
 
         /// <summary>
@@ -113,8 +144,7 @@ namespace MIPS.Architecture
         /// </summary>
         public void Resume()
         {
-            _break = false;
-            WorkerThread.Resume();
+            TrapSync.Set();
         }
 
         private unsafe void Step()
@@ -126,25 +156,21 @@ namespace MIPS.Architecture
             // Single-step mode
             if (SingleStep)
             {
-                // TODO: Invoke this in correct thread
-                if (CPUStep != null)
-                    CPUStep(this, null);
+                RaiseEventOnUIThread(CPUStep, this, null);
                 // Suspend execution of this thread
                 // System.Diagnostics.Debugger.Break();
-                // TODO: Use better method
-                WorkerThread.Suspend();
+                TrapSync.Reset();
+                TrapSync.WaitOne();
             }
 
             // Trigger breakpoints
             if (_break || BreakPoints.Contains((IntPtr)pc))
             {
-                // TODO: Invoke this in correct thread
-                if (BreakpointHit != null)
-                    BreakpointHit(this, null);
+                RaiseEventOnUIThread(BreakpointHit, this, null);
                 // Suspend execution of this thread
                 // System.Diagnostics.Debugger.Break();
-                // Todo: Use better method
-                WorkerThread.Suspend();
+                TrapSync.Reset();
+                TrapSync.WaitOne();
             }
 
             if (IR.OpCode == OpCode.Register)
@@ -476,8 +502,7 @@ namespace MIPS.Architecture
                     throw new NotImplementedException();
                 // Exit
                 case 10:
-                    if (ExitSyscall != null)
-                        ExitSyscall(this, null);
+                    RaiseEventOnUIThread(ExitSyscall, this, null);
                     // TODO: Halt
                     break;
             }
