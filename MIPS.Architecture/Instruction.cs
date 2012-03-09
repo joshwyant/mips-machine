@@ -258,5 +258,10 @@ namespace MIPS.Architecture
             FunctionCode = 0;
             Target = target;
         }
+
+        public override string ToString()
+        {
+            return InstructionDefinition.GetString(this);
+        }
     }
 }

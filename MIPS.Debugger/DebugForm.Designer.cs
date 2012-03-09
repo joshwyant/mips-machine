@@ -54,6 +54,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.tabPageMemory = new System.Windows.Forms.TabPage();
             this.label3 = new System.Windows.Forms.Label();
+            this.labelDisassembly = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -158,7 +159,7 @@
             this.panel1.Controls.Add(this.listViewRegisters);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Right;
             this.panel1.Location = new System.Drawing.Point(470, 49);
-            this.panel1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.panel1.Margin = new System.Windows.Forms.Padding(2);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(164, 429);
             this.panel1.TabIndex = 3;
@@ -170,7 +171,7 @@
             this.columnHeaderValue});
             this.listViewRegisters.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listViewRegisters.Location = new System.Drawing.Point(0, 0);
-            this.listViewRegisters.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.listViewRegisters.Margin = new System.Windows.Forms.Padding(2);
             this.listViewRegisters.Name = "listViewRegisters";
             this.listViewRegisters.Size = new System.Drawing.Size(164, 429);
             this.listViewRegisters.TabIndex = 0;
@@ -191,7 +192,7 @@
             // 
             this.splitter1.Dock = System.Windows.Forms.DockStyle.Right;
             this.splitter1.Location = new System.Drawing.Point(468, 49);
-            this.splitter1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.splitter1.Margin = new System.Windows.Forms.Padding(2);
             this.splitter1.Name = "splitter1";
             this.splitter1.Size = new System.Drawing.Size(2, 429);
             this.splitter1.TabIndex = 4;
@@ -203,7 +204,7 @@
             this.panel2.Controls.Add(this.label1);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.panel2.Location = new System.Drawing.Point(0, 302);
-            this.panel2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.panel2.Margin = new System.Windows.Forms.Padding(2);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(468, 176);
             this.panel2.TabIndex = 5;
@@ -212,7 +213,7 @@
             // 
             this.textBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.textBox1.Location = new System.Drawing.Point(0, 13);
-            this.textBox1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBox1.Margin = new System.Windows.Forms.Padding(2);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
@@ -235,7 +236,7 @@
             // 
             this.splitter2.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.splitter2.Location = new System.Drawing.Point(0, 300);
-            this.splitter2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.splitter2.Margin = new System.Windows.Forms.Padding(2);
             this.splitter2.Name = "splitter2";
             this.splitter2.Size = new System.Drawing.Size(468, 2);
             this.splitter2.TabIndex = 6;
@@ -246,7 +247,7 @@
             this.panel3.Controls.Add(this.tabControl1);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel3.Location = new System.Drawing.Point(0, 49);
-            this.panel3.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.panel3.Margin = new System.Windows.Forms.Padding(2);
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(468, 251);
             this.panel3.TabIndex = 7;
@@ -257,7 +258,7 @@
             this.tabControl1.Controls.Add(this.tabPageMemory);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
-            this.tabControl1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(2);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(468, 251);
@@ -265,11 +266,12 @@
             // 
             // tabPageDisassembly
             // 
+            this.tabPageDisassembly.Controls.Add(this.labelDisassembly);
             this.tabPageDisassembly.Controls.Add(this.label2);
             this.tabPageDisassembly.Location = new System.Drawing.Point(4, 22);
-            this.tabPageDisassembly.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPageDisassembly.Margin = new System.Windows.Forms.Padding(2);
             this.tabPageDisassembly.Name = "tabPageDisassembly";
-            this.tabPageDisassembly.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPageDisassembly.Padding = new System.Windows.Forms.Padding(2);
             this.tabPageDisassembly.Size = new System.Drawing.Size(460, 225);
             this.tabPageDisassembly.TabIndex = 0;
             this.tabPageDisassembly.Text = "Disassembly";
@@ -289,10 +291,10 @@
             // 
             this.tabPageMemory.Controls.Add(this.label3);
             this.tabPageMemory.Location = new System.Drawing.Point(4, 22);
-            this.tabPageMemory.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPageMemory.Margin = new System.Windows.Forms.Padding(2);
             this.tabPageMemory.Name = "tabPageMemory";
-            this.tabPageMemory.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.tabPageMemory.Size = new System.Drawing.Size(459, 233);
+            this.tabPageMemory.Padding = new System.Windows.Forms.Padding(2);
+            this.tabPageMemory.Size = new System.Drawing.Size(460, 225);
             this.tabPageMemory.TabIndex = 1;
             this.tabPageMemory.Text = "Memory";
             this.tabPageMemory.UseVisualStyleBackColor = true;
@@ -306,6 +308,14 @@
             this.label3.Size = new System.Drawing.Size(247, 13);
             this.label3.TabIndex = 0;
             this.label3.Text = "Step through the machine code to inspect memory.";
+            // 
+            // labelDisassembly
+            // 
+            this.labelDisassembly.AutoSize = true;
+            this.labelDisassembly.Location = new System.Drawing.Point(9, 6);
+            this.labelDisassembly.Name = "labelDisassembly";
+            this.labelDisassembly.Size = new System.Drawing.Size(0, 13);
+            this.labelDisassembly.TabIndex = 1;
             // 
             // DebugForm
             // 
@@ -321,7 +331,7 @@
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "DebugForm";
             this.Text = "MIPS Debugger";
             this.menuStrip1.ResumeLayout(false);
@@ -369,5 +379,6 @@
         private System.Windows.Forms.TabPage tabPageMemory;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label labelDisassembly;
     }
 }

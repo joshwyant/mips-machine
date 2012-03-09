@@ -24,7 +24,7 @@ namespace MIPS.Debugger
 
         void CPU_CPUStep(object sender, EventArgs e)
         {
-            listViewRegisters.Clear();
+            listViewRegisters.Items.Clear();
 
             for (int i = 0; i < 32; i++)
             {
@@ -33,6 +33,9 @@ namespace MIPS.Debugger
                     listViewRegisters.Items.Add(new ListViewItem(new[] { Architecture.InstructionSet.RegisterNames[i], Machine.CPU.RF[i].ToString("X") }));
                 }
             }
+
+            label2.Text = "";
+            labelDisassembly.Text += Machine.CPU.IR.ToString() + "\r\n";
         }
 
         private void toolStripButtonResume_Click(object sender, EventArgs e)

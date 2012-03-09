@@ -48,8 +48,8 @@
     <Compile Include="FunctionCode.cs" />
     <Compile Include="ImmediateType.cs" />
     <Compile Include="Instruction.cs" />
+    <Compile Include="InstructionArgumentType.cs" />
     <Compile Include="InstructionDefinition.cs" />
-    <Compile Include="InstructionFormat.cs" />
     <Compile Include="InstructionSet.cs" />
     <Compile Include="Machine.cs" />
     <Compile Include="MMU.cs" />
