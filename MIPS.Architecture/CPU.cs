@@ -124,6 +124,7 @@ namespace MIPS.Architecture
         {
             // Sets the trap sync, ready to break
             TrapSync.Set();
+            _break = false;
 
             if (!WorkerThread.IsAlive)
             {
@@ -136,7 +137,7 @@ namespace MIPS.Architecture
         /// </summary>
         public void Break()
         {
-            TrapSync.Reset();
+            _break = true;
         }
 
         /// <summary>
@@ -144,6 +145,7 @@ namespace MIPS.Architecture
         /// </summary>
         public void Resume()
         {
+            _break = false;
             TrapSync.Set();
         }
 
