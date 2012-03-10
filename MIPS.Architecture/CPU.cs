@@ -9,6 +9,7 @@ namespace MIPS.Architecture
 {
     public class CPU
     {
+        #region Members
         /// <summary>
         /// Gets the worker thread the CPU is running on.
         /// </summary>
@@ -55,7 +56,7 @@ namespace MIPS.Architecture
         public event EventHandler BreakpointHit;
 
         /// <summary>
-        /// Gets or sets whether the CPU is executing in single-step mode.
+        /// Gets or sets whether the CPU should run in single-step mode
         /// </summary>
         public bool SingleStep { get; set; }
 
@@ -65,15 +66,22 @@ namespace MIPS.Architecture
         public event EventHandler CPUStep;
 
         /// <summary>
+        /// Occurs when the CPU is paused using Pause().
+        /// </summary>
+        public event EventHandler Paused;
+
+        /// <summary>
         /// Exit Syscall
         /// </summary>
         public event EventHandler ExitSyscall;
 
         // If true, pause execution at the next opportunity.
-        bool _break = false;
+        bool pause = false;
 
         public List<IntPtr> BreakPoints = new List<IntPtr>();
+        #endregion
 
+        #region Helper Methods
         /// <summary>
         /// Helper method to raise an event on the correct thread
         /// </summary>
@@ -92,24 +100,31 @@ namespace MIPS.Architecture
                 }
             }
         }
+        #endregion
 
+        #region Constructor
         /// <summary>
         /// Creates a new CPU. This constructor is only called inside the Machine constructor.
         /// </summary>
         internal CPU(Machine machine)
         {
+            Machine = machine;
+
+            // Create the thread for running the CPU
             WorkerThread = new Thread(Run);
+
+            // Allocate memory for the 32 general purpose registers and initialize each of them to zero.
             unsafe
             {
                 RF = (uint*)System.Runtime.InteropServices.Marshal.AllocHGlobal(32 * 4);
                 for (int i = 0; i < 32; i++)
                     RF[i] = 0;
             }
-            Machine = machine;
         }
+        #endregion
 
         // Runs on the worker thread
-        internal void Run()
+        private void Run()
         {
             while (true)
             {
@@ -118,26 +133,30 @@ namespace MIPS.Architecture
         }
 
         /// <summary>
-        /// Starts the CPU running, or resumes
+        /// Starts the CPU running.
         /// </summary>
         public void Start()
         {
+            if (WorkerThread.IsAlive)
+            {
+                throw new InvalidOperationException("CPU is already running.");
+            }
+
             // Sets the trap sync, ready to break
             TrapSync.Set();
-            _break = false;
-
-            if (!WorkerThread.IsAlive)
-            {
-                WorkerThread.Start();
-            }
+            pause = false;
+            WorkerThread.Start();
         }
 
         /// <summary>
         /// Pauses CPU execution.
         /// </summary>
-        public void Break()
+        public void Pause()
         {
-            _break = true;
+            if (!WorkerThread.IsAlive)
+                throw new InvalidOperationException("CPU is not running.");
+
+            pause = true;
         }
 
         /// <summary>
@@ -145,32 +164,56 @@ namespace MIPS.Architecture
         /// </summary>
         public void Resume()
         {
-            _break = false;
+            if (!WorkerThread.IsAlive)
+                throw new InvalidOperationException("CPU is not running.");
+
+            pause = false;
+            SingleStep = false;
+            TrapSync.Set();
+        }
+
+        /// <summary>
+        /// Steps to the next instruction.
+        /// </summary>
+        public void NextStep()
+        {
+            if (!WorkerThread.IsAlive)
+                throw new InvalidOperationException("CPU is not running.");
+
+            SingleStep = true;
+            pause = false;
+
+            // Signal the CPU to execute the next instruction
             TrapSync.Set();
         }
 
         private unsafe void Step()
         {
             // Fetch the next instruction
-            int pc = unchecked((int)PC++);
+            int pc = unchecked((int)PC);
             IR = new Instruction(Machine.Memory[pc >> 2]);
 
-            // Single-step mode
+
+            // Raise events
+            if (pause)
+            {
+                RaiseEventOnUIThread(Paused, this, null);
+            }
+            if (BreakPoints.Contains((IntPtr)pc))
+            {
+                RaiseEventOnUIThread(BreakpointHit, this, null);
+            }
             if (SingleStep)
             {
                 RaiseEventOnUIThread(CPUStep, this, null);
-                // Suspend execution of this thread
-                // System.Diagnostics.Debugger.Break();
-                TrapSync.Reset();
-                TrapSync.WaitOne();
             }
 
-            // Trigger breakpoints
-            if (_break || BreakPoints.Contains((IntPtr)pc))
+            // Pause CPU execution
+            if (pause || BreakPoints.Contains((IntPtr)pc) || SingleStep)
             {
-                RaiseEventOnUIThread(BreakpointHit, this, null);
-                // Suspend execution of this thread
+                pause = false;
                 // System.Diagnostics.Debugger.Break();
+                // Suspend this thread and wait for the CPU to be resumed
                 TrapSync.Reset();
                 TrapSync.WaitOne();
             }
@@ -187,6 +230,9 @@ namespace MIPS.Architecture
             {
                 ExecuteImmediateInstruction();
             }
+
+            // Increment the program counter
+            PC++;
         }
 
         private unsafe void ExecuteRegisterInstruction()
