@@ -35,7 +35,9 @@
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.toolStripButtonRun = new System.Windows.Forms.ToolStripButton();
             this.toolStripButtonPause = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButtonSingleStep = new System.Windows.Forms.ToolStripButton();
             this.toolStripButtonNext = new System.Windows.Forms.ToolStripButton();
             this.toolStripButtonResume = new System.Windows.Forms.ToolStripButton();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
@@ -55,8 +57,6 @@
             this.label2 = new System.Windows.Forms.Label();
             this.tabPageMemory = new System.Windows.Forms.TabPage();
             this.label3 = new System.Windows.Forms.Label();
-            this.toolStripButtonRun = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButtonSingleStep = new System.Windows.Forms.ToolStripButton();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -120,6 +120,16 @@
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
+            // toolStripButtonRun
+            // 
+            this.toolStripButtonRun.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButtonRun.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonRun.Image")));
+            this.toolStripButtonRun.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonRun.Name = "toolStripButtonRun";
+            this.toolStripButtonRun.Size = new System.Drawing.Size(38, 24);
+            this.toolStripButtonRun.Text = "Run";
+            this.toolStripButtonRun.Click += new System.EventHandler(this.toolStripButtonRun_Click);
+            // 
             // toolStripButtonPause
             // 
             this.toolStripButtonPause.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
@@ -130,6 +140,16 @@
             this.toolStripButtonPause.Size = new System.Drawing.Size(51, 24);
             this.toolStripButtonPause.Text = "Pause";
             this.toolStripButtonPause.Click += new System.EventHandler(this.toolStripButtonPause_Click);
+            // 
+            // toolStripButtonSingleStep
+            // 
+            this.toolStripButtonSingleStep.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButtonSingleStep.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonSingleStep.Image")));
+            this.toolStripButtonSingleStep.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonSingleStep.Name = "toolStripButtonSingleStep";
+            this.toolStripButtonSingleStep.Size = new System.Drawing.Size(88, 24);
+            this.toolStripButtonSingleStep.Text = "Single Step";
+            this.toolStripButtonSingleStep.Click += new System.EventHandler(this.toolStripButtonSingleStep_Click);
             // 
             // toolStripButtonNext
             // 
@@ -322,26 +342,6 @@
             this.label3.Size = new System.Drawing.Size(329, 17);
             this.label3.TabIndex = 0;
             this.label3.Text = "Step through the machine code to inspect memory.";
-            // 
-            // toolStripButtonRun
-            // 
-            this.toolStripButtonRun.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButtonRun.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonRun.Image")));
-            this.toolStripButtonRun.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButtonRun.Name = "toolStripButtonRun";
-            this.toolStripButtonRun.Size = new System.Drawing.Size(38, 24);
-            this.toolStripButtonRun.Text = "Run";
-            this.toolStripButtonRun.Click += new System.EventHandler(this.toolStripButtonRun_Click);
-            // 
-            // toolStripButtonSingleStep
-            // 
-            this.toolStripButtonSingleStep.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButtonSingleStep.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonSingleStep.Image")));
-            this.toolStripButtonSingleStep.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButtonSingleStep.Name = "toolStripButtonSingleStep";
-            this.toolStripButtonSingleStep.Size = new System.Drawing.Size(88, 24);
-            this.toolStripButtonSingleStep.Text = "Single Step";
-            this.toolStripButtonSingleStep.Click += new System.EventHandler(this.toolStripButtonSingleStep_Click);
             // 
             // DebugForm
             // 

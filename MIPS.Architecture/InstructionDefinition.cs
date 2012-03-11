@@ -17,6 +17,7 @@ namespace MIPS.Architecture
         {
             Name = name;
             Arguments = args;
+            OpCode = OpCode.Register;
             FunctionCode = functionCode;
         }
 
@@ -25,6 +26,14 @@ namespace MIPS.Architecture
             Name = name;
             Arguments = args;
             OpCode = opCode;
+        }
+
+        public InstructionDefinition(string name, InstructionArgumentType[] args, BranchCode branchCode)
+        {
+            Name = name;
+            Arguments = args;
+            OpCode = OpCode.Branch;
+            BranchCode = branchCode;
         }
 
         /// <summary>
@@ -61,7 +70,10 @@ namespace MIPS.Architecture
             }
             else
             {
-                return InstructionSet.InstructionsByOpCode[ins.OpCode];
+                if (ins.OpCode != OpCode.Branch)
+                    return InstructionSet.InstructionsByOpCode[ins.OpCode];
+                else
+                    return InstructionSet.InstructionsByBranchCode[ins.BranchCode];
             }
         }
 

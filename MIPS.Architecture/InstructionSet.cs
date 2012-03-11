@@ -20,6 +20,8 @@ namespace MIPS.Architecture
 
         public static Dictionary<OpCode, InstructionDefinition> InstructionsByOpCode { get; private set; }
 
+        public static Dictionary<BranchCode, InstructionDefinition> InstructionsByBranchCode { get; private set; }
+
         #region Instructions
         private static InstructionDefinition[] _Instructions = {
                                                                    new InstructionDefinition(
@@ -416,6 +418,22 @@ namespace MIPS.Architecture
                                                                        }, 
                                                                        OpCode.xori
                                                                     ),
+                                                                    new InstructionDefinition(
+                                                                       "bgez", 
+                                                                       new InstructionArgumentType[] {
+                                                                           InstructionArgumentType.Rs, 
+                                                                           InstructionArgumentType.Label 
+                                                                       }, 
+                                                                       BranchCode.bgez
+                                                                    ),
+                                                                    new InstructionDefinition(
+                                                                       "bltz", 
+                                                                       new InstructionArgumentType[] { 
+                                                                           InstructionArgumentType.Rs, 
+                                                                           InstructionArgumentType.Label 
+                                                                       }, 
+                                                                       BranchCode.bltz
+                                                                    ),
                                                                };
         #endregion
 
@@ -423,7 +441,8 @@ namespace MIPS.Architecture
         {
             Instructions = _Instructions.ToDictionary(i => i.Name);
             InstructionsByFunctionCode = _Instructions.Where(i => i.OpCode == OpCode.Register).ToDictionary(i => i.FunctionCode);
-            InstructionsByOpCode = _Instructions.Where(i => i.OpCode != OpCode.Register).ToDictionary(i => i.OpCode);
+            InstructionsByOpCode = _Instructions.Where(i => i.OpCode != OpCode.Register && i.OpCode != OpCode.Branch).ToDictionary(i => i.OpCode);
+            InstructionsByBranchCode = _Instructions.Where(i => i.OpCode == OpCode.Branch).ToDictionary(i => i.BranchCode);
         }
     }
 }

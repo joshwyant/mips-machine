@@ -87,6 +87,9 @@ namespace MIPS.Architecture
         /// </summary>
         private void RaiseEventOnUIThread(Delegate e, params object[] args)
         {
+            if (e == null)
+                return;
+
             foreach (Delegate d in e.GetInvocationList())
             {
                 ISynchronizeInvoke syncObj = d.Target as ISynchronizeInvoke;
@@ -371,9 +374,6 @@ namespace MIPS.Architecture
         {
             switch (IR.OpCode)
             {
-                // The default Op-Code that deals with registers and is defined by a function code.
-                case OpCode.Register:
-                    throw new NotImplementedException();
                 // Special branches with a branch code.
                 case OpCode.Branch:
                     switch (IR.BranchCode)
@@ -551,8 +551,8 @@ namespace MIPS.Architecture
                 // Exit
                 case 10:
                     RaiseEventOnUIThread(ExitSyscall, this, null);
-                    // TODO: Halt
-                    break;
+                    // TODO: Halt better
+                    while (true) ;
             }
         }
     }
