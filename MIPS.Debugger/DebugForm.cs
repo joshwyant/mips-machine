@@ -95,6 +95,8 @@ namespace MIPS.Debugger
         {
             if (!string.IsNullOrWhiteSpace(textBoxProgram.Text))
             {
+                Machine.CPU.Stop();
+
                 Assembler asm = new Assembler();
                 
                 MemoryStream ms = new MemoryStream();
@@ -128,6 +130,11 @@ namespace MIPS.Debugger
             {
                 textBoxProgram.Text = System.IO.File.ReadAllText(openFileDialog.FileName);
             }
+        }
+
+        private void textBoxProgram_TextChanged(object sender, EventArgs e)
+        {
+            toolStripButtonRun.Enabled = true;
         }
     }
 }

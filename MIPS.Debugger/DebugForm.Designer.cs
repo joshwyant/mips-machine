@@ -81,7 +81,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
-            this.menuStrip1.Size = new System.Drawing.Size(634, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(944, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -130,7 +130,7 @@
             this.toolStripButtonResume});
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(634, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(944, 25);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -189,10 +189,10 @@
             // 
             // statusStrip1
             // 
-            this.statusStrip1.Location = new System.Drawing.Point(0, 478);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 640);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 10, 0);
-            this.statusStrip1.Size = new System.Drawing.Size(634, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(944, 22);
             this.statusStrip1.TabIndex = 2;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -200,10 +200,10 @@
             // 
             this.panel1.Controls.Add(this.listViewRegisters);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel1.Location = new System.Drawing.Point(470, 49);
+            this.panel1.Location = new System.Drawing.Point(747, 49);
             this.panel1.Margin = new System.Windows.Forms.Padding(2);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(164, 429);
+            this.panel1.Size = new System.Drawing.Size(197, 591);
             this.panel1.TabIndex = 3;
             // 
             // listViewRegisters
@@ -215,7 +215,7 @@
             this.listViewRegisters.Location = new System.Drawing.Point(0, 0);
             this.listViewRegisters.Margin = new System.Windows.Forms.Padding(2);
             this.listViewRegisters.Name = "listViewRegisters";
-            this.listViewRegisters.Size = new System.Drawing.Size(164, 429);
+            this.listViewRegisters.Size = new System.Drawing.Size(197, 591);
             this.listViewRegisters.TabIndex = 0;
             this.listViewRegisters.UseCompatibleStateImageBehavior = false;
             this.listViewRegisters.View = System.Windows.Forms.View.Details;
@@ -233,10 +233,10 @@
             // splitter1
             // 
             this.splitter1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.splitter1.Location = new System.Drawing.Point(468, 49);
+            this.splitter1.Location = new System.Drawing.Point(745, 49);
             this.splitter1.Margin = new System.Windows.Forms.Padding(2);
             this.splitter1.Name = "splitter1";
-            this.splitter1.Size = new System.Drawing.Size(2, 429);
+            this.splitter1.Size = new System.Drawing.Size(2, 591);
             this.splitter1.TabIndex = 4;
             this.splitter1.TabStop = false;
             // 
@@ -245,10 +245,10 @@
             this.panel2.Controls.Add(this.textBox1);
             this.panel2.Controls.Add(this.label1);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel2.Location = new System.Drawing.Point(0, 302);
+            this.panel2.Location = new System.Drawing.Point(0, 464);
             this.panel2.Margin = new System.Windows.Forms.Padding(2);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(468, 176);
+            this.panel2.Size = new System.Drawing.Size(745, 176);
             this.panel2.TabIndex = 5;
             // 
             // textBox1
@@ -260,7 +260,7 @@
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox1.Size = new System.Drawing.Size(468, 163);
+            this.textBox1.Size = new System.Drawing.Size(745, 163);
             this.textBox1.TabIndex = 1;
             // 
             // label1
@@ -277,10 +277,10 @@
             // splitter2
             // 
             this.splitter2.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.splitter2.Location = new System.Drawing.Point(0, 300);
+            this.splitter2.Location = new System.Drawing.Point(0, 462);
             this.splitter2.Margin = new System.Windows.Forms.Padding(2);
             this.splitter2.Name = "splitter2";
-            this.splitter2.Size = new System.Drawing.Size(468, 2);
+            this.splitter2.Size = new System.Drawing.Size(745, 2);
             this.splitter2.TabIndex = 6;
             this.splitter2.TabStop = false;
             // 
@@ -291,7 +291,7 @@
             this.panel3.Location = new System.Drawing.Point(0, 49);
             this.panel3.Margin = new System.Windows.Forms.Padding(2);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(468, 251);
+            this.panel3.Size = new System.Drawing.Size(745, 413);
             this.panel3.TabIndex = 7;
             // 
             // tabControl1
@@ -304,7 +304,7 @@
             this.tabControl1.Margin = new System.Windows.Forms.Padding(2);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(468, 251);
+            this.tabControl1.Size = new System.Drawing.Size(745, 413);
             this.tabControl1.TabIndex = 0;
             // 
             // tabPageEdit
@@ -313,7 +313,7 @@
             this.tabPageEdit.Location = new System.Drawing.Point(4, 22);
             this.tabPageEdit.Name = "tabPageEdit";
             this.tabPageEdit.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageEdit.Size = new System.Drawing.Size(460, 225);
+            this.tabPageEdit.Size = new System.Drawing.Size(737, 387);
             this.tabPageEdit.TabIndex = 2;
             this.tabPageEdit.Text = "Edit";
             this.tabPageEdit.UseVisualStyleBackColor = true;
@@ -326,9 +326,10 @@
             this.textBoxProgram.Multiline = true;
             this.textBoxProgram.Name = "textBoxProgram";
             this.textBoxProgram.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBoxProgram.Size = new System.Drawing.Size(454, 219);
+            this.textBoxProgram.Size = new System.Drawing.Size(731, 381);
             this.textBoxProgram.TabIndex = 0;
             this.textBoxProgram.WordWrap = false;
+            this.textBoxProgram.TextChanged += new System.EventHandler(this.textBoxProgram_TextChanged);
             // 
             // tabPageDisassembly
             // 
@@ -391,7 +392,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(634, 500);
+            this.ClientSize = new System.Drawing.Size(944, 662);
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.splitter2);
             this.Controls.Add(this.panel2);

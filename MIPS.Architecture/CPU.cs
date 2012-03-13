@@ -78,6 +78,8 @@ namespace MIPS.Architecture
         // If true, pause execution at the next opportunity.
         bool pause = false;
 
+        bool stop = false;
+
         public List<IntPtr> BreakPoints = new List<IntPtr>();
         #endregion
 
@@ -129,10 +131,12 @@ namespace MIPS.Architecture
         // Runs on the worker thread
         private void Run()
         {
-            while (true)
+            while (!stop)
             {
                 Step();
             }
+
+            stop = false;
         }
 
         /// <summary>
@@ -140,6 +144,11 @@ namespace MIPS.Architecture
         /// </summary>
         public void Start()
         {
+            if (WorkerThread.ThreadState == ThreadState.Stopped)
+            {
+                WorkerThread = new Thread(Run);
+            }
+
             if (WorkerThread.IsAlive)
             {
                 throw new InvalidOperationException("CPU is already running.");
@@ -149,6 +158,23 @@ namespace MIPS.Architecture
             TrapSync.Set();
             pause = false;
             WorkerThread.Start();
+        }
+
+        /// <summary>
+        /// Stops the CPU.
+        /// </summary>
+        public void Stop()
+        {
+            if (WorkerThread.IsAlive)
+            {
+                stop = true;
+
+                // TODO: I think this is the right way to do it.
+                if (Thread.CurrentThread != WorkerThread)
+                {
+                    WorkerThread.Join();
+                }
+            }
         }
 
         /// <summary>
@@ -552,7 +578,8 @@ namespace MIPS.Architecture
                 case 10:
                     RaiseEventOnUIThread(ExitSyscall, this, null);
                     // TODO: Halt better
-                    while (true) ;
+                    while (!stop) ;
+                    break;
             }
         }
     }
