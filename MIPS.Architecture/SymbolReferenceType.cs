@@ -1,8 +1,10 @@
 ﻿namespace MIPS.Architecture
 {
-    public enum ImmediateType
+    public enum SymbolReferenceType
     {
         Immediate,
+        ImmediateUpper,
+        ImmediateLower,
         Jump,
     }
 }

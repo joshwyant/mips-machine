@@ -10,6 +10,12 @@ namespace MIPS.Architecture
         public string Name { get; set; }
         public string Section { get; set; }
         public int Offset { get; set; }
-        public ImmediateType Type { get; set; }
+        public SymbolReferenceType Type { get; set; }
+
+        public SymbolReference(Assembler asm)
+        {
+            Section = asm.CurrentSection.Name;
+            Offset = asm.CurrentSection.Offset;
+        }
     }
 }

@@ -12,6 +12,7 @@ namespace MIPS.Simulator
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
+        [STAThread]
         static void Main()
         {
             Console.WriteLine("Hypothetical Machine Simulator based on MIPS, written by Josh Wyant");

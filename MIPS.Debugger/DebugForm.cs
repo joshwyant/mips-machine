@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using MIPS.Architecture;
+using System.IO;
 
 namespace MIPS.Debugger
 {
@@ -85,7 +86,30 @@ namespace MIPS.Debugger
             toolStripButtonSingleStep.Enabled = false;
             toolStripButtonPause.Enabled = true;
 
+            BuildProgram();
+
             Machine.Run();
+        }
+
+        private void BuildProgram()
+        {
+            if (!string.IsNullOrWhiteSpace(textBoxProgram.Text))
+            {
+                Assembler asm = new Assembler();
+                
+                MemoryStream ms = new MemoryStream();
+                StreamWriter w = new StreamWriter(ms);
+                w.Write(textBoxProgram.Text);
+                w.Flush();
+
+                ms.Position = 0;
+
+                asm.Read(ms);
+
+                var writer = new DefaultAssemblyWriter(Machine, 0x00400000, 0x10010000);
+
+                asm.Write(writer);
+            }
         }
 
         private void toolStripButtonSingleStep_Click(object sender, EventArgs e)
@@ -96,6 +120,14 @@ namespace MIPS.Debugger
 
             Machine.CPU.SingleStep = true;
             Machine.Run();
+        }
+
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                textBoxProgram.Text = System.IO.File.ReadAllText(openFileDialog.FileName);
+            }
         }
     }
 }

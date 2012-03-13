@@ -11,12 +11,14 @@ namespace MIPS.Architecture
         public string Name { get; set; }
         public AssemblyContext Context { get; set; }
         public Stream Stream { get; set; }
+        public int Offset { get; set; }
 
         public Section(string name)
         {
             Name = name;
             Context = new AssemblyContext { Section = name };
             Stream = new MemoryStream();
+            Offset = 0;
         }
     }
 }

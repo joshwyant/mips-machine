@@ -43,15 +43,18 @@
   <ItemGroup>
     <Compile Include="Assembler.cs" />
     <Compile Include="AssemblyContext.cs" />
+    <Compile Include="AssemblyWriter.cs" />
     <Compile Include="BranchCode.cs" />
     <Compile Include="CPU.cs" />
+    <Compile Include="DefaultAssemblyWriter.cs" />
     <Compile Include="FunctionCode.cs" />
-    <Compile Include="ImmediateType.cs" />
+    <Compile Include="SymbolReferenceType.cs" />
     <Compile Include="Instruction.cs" />
     <Compile Include="InstructionArgumentType.cs" />
     <Compile Include="InstructionDefinition.cs" />
     <Compile Include="InstructionSet.cs" />
     <Compile Include="Machine.cs" />
+    <Compile Include="MacroInstructionDefinition.cs" />
     <Compile Include="MMU.cs" />
     <Compile Include="OpCode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
