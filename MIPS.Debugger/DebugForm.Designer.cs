@@ -31,6 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DebugForm));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -52,14 +53,13 @@
             this.splitter2 = new System.Windows.Forms.Splitter();
             this.panel3 = new System.Windows.Forms.Panel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabPageEdit = new System.Windows.Forms.TabPage();
+            this.textBoxProgram = new System.Windows.Forms.TextBox();
             this.tabPageDisassembly = new System.Windows.Forms.TabPage();
             this.labelDisassembly = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.tabPageMemory = new System.Windows.Forms.TabPage();
             this.label3 = new System.Windows.Forms.Label();
-            this.tabPageEdit = new System.Windows.Forms.TabPage();
-            this.textBoxProgram = new System.Windows.Forms.TextBox();
-            this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
@@ -67,9 +67,9 @@
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
             this.tabControl1.SuspendLayout();
+            this.tabPageEdit.SuspendLayout();
             this.tabPageDisassembly.SuspendLayout();
             this.tabPageMemory.SuspendLayout();
-            this.tabPageEdit.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -92,6 +92,13 @@
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
+            // 
+            // openToolStripMenuItem
+            // 
+            this.openToolStripMenuItem.Name = "openToolStripMenuItem";
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
+            this.openToolStripMenuItem.Text = "Open";
+            this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
             // debugToolStripMenuItem
             // 
@@ -300,6 +307,29 @@
             this.tabControl1.Size = new System.Drawing.Size(468, 251);
             this.tabControl1.TabIndex = 0;
             // 
+            // tabPageEdit
+            // 
+            this.tabPageEdit.Controls.Add(this.textBoxProgram);
+            this.tabPageEdit.Location = new System.Drawing.Point(4, 22);
+            this.tabPageEdit.Name = "tabPageEdit";
+            this.tabPageEdit.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageEdit.Size = new System.Drawing.Size(460, 225);
+            this.tabPageEdit.TabIndex = 2;
+            this.tabPageEdit.Text = "Edit";
+            this.tabPageEdit.UseVisualStyleBackColor = true;
+            // 
+            // textBoxProgram
+            // 
+            this.textBoxProgram.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxProgram.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBoxProgram.Location = new System.Drawing.Point(3, 3);
+            this.textBoxProgram.Multiline = true;
+            this.textBoxProgram.Name = "textBoxProgram";
+            this.textBoxProgram.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.textBoxProgram.Size = new System.Drawing.Size(454, 219);
+            this.textBoxProgram.TabIndex = 0;
+            this.textBoxProgram.WordWrap = false;
+            // 
             // tabPageDisassembly
             // 
             this.tabPageDisassembly.Controls.Add(this.labelDisassembly);
@@ -353,36 +383,6 @@
             this.label3.TabIndex = 0;
             this.label3.Text = "Step through the machine code to inspect memory.";
             // 
-            // tabPageEdit
-            // 
-            this.tabPageEdit.Controls.Add(this.textBoxProgram);
-            this.tabPageEdit.Location = new System.Drawing.Point(4, 22);
-            this.tabPageEdit.Name = "tabPageEdit";
-            this.tabPageEdit.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageEdit.Size = new System.Drawing.Size(460, 225);
-            this.tabPageEdit.TabIndex = 2;
-            this.tabPageEdit.Text = "Edit";
-            this.tabPageEdit.UseVisualStyleBackColor = true;
-            // 
-            // textBoxProgram
-            // 
-            this.textBoxProgram.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBoxProgram.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBoxProgram.Location = new System.Drawing.Point(3, 3);
-            this.textBoxProgram.Multiline = true;
-            this.textBoxProgram.Name = "textBoxProgram";
-            this.textBoxProgram.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBoxProgram.Size = new System.Drawing.Size(454, 219);
-            this.textBoxProgram.TabIndex = 0;
-            this.textBoxProgram.WordWrap = false;
-            // 
-            // openToolStripMenuItem
-            // 
-            this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.openToolStripMenuItem.Text = "Open";
-            this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
-            // 
             // openFileDialog
             // 
             this.openFileDialog.Filter = "Assembly Files|*.asm;*.s";
@@ -413,12 +413,12 @@
             this.panel2.PerformLayout();
             this.panel3.ResumeLayout(false);
             this.tabControl1.ResumeLayout(false);
+            this.tabPageEdit.ResumeLayout(false);
+            this.tabPageEdit.PerformLayout();
             this.tabPageDisassembly.ResumeLayout(false);
             this.tabPageDisassembly.PerformLayout();
             this.tabPageMemory.ResumeLayout(false);
             this.tabPageMemory.PerformLayout();
-            this.tabPageEdit.ResumeLayout(false);
-            this.tabPageEdit.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 

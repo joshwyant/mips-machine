@@ -6,9 +6,10 @@
 
               .text
     #  Print the greeting message.
-              li        $v0, 4
-              la        $a0, Message
+              ori        $v0, $0, 4
+              lui        $a0, 0x1001
+              ori        $a0, $a0, Message
               syscall
     #  Return to the operating system.
-              li        $v0, 10
+              ori        $v0, $0, 10
               syscall

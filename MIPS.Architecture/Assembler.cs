@@ -95,6 +95,15 @@ namespace MIPS.Architecture
             if (string.IsNullOrEmpty(snippet))
                 return;
 
+            // Get the label of the snippet.
+            if (snippet.Contains(':'))
+            {
+                var labelName = snippet.Remove(snippet.IndexOf(':')).Trim();
+                MarkLabel(labelName);
+
+                snippet = snippet.Substring(snippet.IndexOf(':') + 1).Trim();
+            }
+
             if (snippet.StartsWith("."))
             {
                 // Process assembler directives
@@ -109,7 +118,7 @@ namespace MIPS.Architecture
 
         private void ProcessInstruction(string snippet)
         {
-            var parts = snippet.Split(new[] { ' ' }, 2);
+            var parts = snippet.Split(new[] { ' ', '\t' }, 2, StringSplitOptions.RemoveEmptyEntries);
             var name = parts[0].Trim();
             var arg = parts.Length == 1 ? string.Empty : parts[1].Trim();
 
@@ -217,7 +226,28 @@ namespace MIPS.Architecture
             if (Sections.Where(s => s.Name == directive).Any())
                 SetContext(directive);
             else
-                throw new NotImplementedException();
+            {
+                var parts = directive.Split(new[] {' '}, 2);
+                var name = parts[0];
+
+                switch (name)
+                {
+                    case ".asciiz":
+                        var str = parts[1].Trim();
+                        if (!(str.StartsWith("\"") && str.EndsWith("\"")))
+                            throw new ArgumentException("String expected.");
+
+                        str = str.Substring(1, str.Length - 2).Replace(@"\\", "\\").Replace(@"\r", "\r").Replace(@"\n", "\n");
+
+                        CurrentSection.Stream.Write(Encoding.ASCII.GetBytes(str), 0, str.Length);
+                        CurrentSection.Stream.Write(new byte[] { 0 }, 0, 1);
+                        CurrentSection.Offset += str.Length + 1;
+
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
         }
 
         void Error(string error)

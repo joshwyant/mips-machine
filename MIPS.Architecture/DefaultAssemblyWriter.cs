@@ -118,7 +118,7 @@ namespace MIPS.Architecture
             // TODO: Implement some sort of raw memory copy that takes into account memory mapping. This will do for now.
             for (int i = 0; i < buffer.Length / 4; i++)
             {
-                Machine.Memory[(int)((TextSection >> 2) + i)] = BitConverter.ToUInt32(buffer, i * 4);
+                Machine.Memory[(int)(address >> 2) + i] = BitConverter.ToUInt32(buffer, i * 4);
             }
         }
     }
