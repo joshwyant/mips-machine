@@ -63,6 +63,8 @@ namespace MIPS.Debugger
             toolStripButtonPause.Enabled = true;
 
             Machine.CPU.Resume();
+
+            ExitDisassembly();
         }
 
         private void toolStripButtonPause_Click(object sender, EventArgs e)
@@ -88,6 +90,7 @@ namespace MIPS.Debugger
 
             BuildProgram();
 
+            Machine.CPU.SingleStep = false;
             Machine.Run();
         }
 
@@ -96,6 +99,8 @@ namespace MIPS.Debugger
             if (!string.IsNullOrWhiteSpace(textBoxProgram.Text))
             {
                 Machine.CPU.Stop();
+
+                ExitDisassembly();
 
                 Assembler asm = new Assembler();
                 
@@ -114,14 +119,24 @@ namespace MIPS.Debugger
             }
         }
 
+        private void ExitDisassembly()
+        {
+            labelDisassembly.Text = "";
+            label2.Text = "Step through the program to view disassembly.";
+        }
+
         private void toolStripButtonSingleStep_Click(object sender, EventArgs e)
         {
             toolStripButtonRun.Enabled = false;
             toolStripButtonSingleStep.Enabled = false;
             toolStripButtonResume.Enabled = true;
 
+            BuildProgram();
+
             Machine.CPU.SingleStep = true;
             Machine.Run();
+
+            tabControl1.SelectedTab = tabPageDisassembly;
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -135,6 +150,7 @@ namespace MIPS.Debugger
         private void textBoxProgram_TextChanged(object sender, EventArgs e)
         {
             toolStripButtonRun.Enabled = true;
+            toolStripButtonSingleStep.Enabled = true;
         }
     }
 }
