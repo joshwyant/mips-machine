@@ -8,6 +8,7 @@ namespace MIPS.Architecture
     public class SymbolReference
     {
         public string Name { get; set; }
+        public Symbol Symbol { get; set; }
         public string Section { get; set; }
         public int Offset { get; set; }
         public SymbolReferenceType Type { get; set; }

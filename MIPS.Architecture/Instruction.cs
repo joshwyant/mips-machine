@@ -259,6 +259,56 @@ namespace MIPS.Architecture
             Target = target;
         }
 
+        public static Instruction FromDefinition(InstructionDefinition def, params int[] args)
+        {
+            return FromDefinition(def, Register.zero, args);
+        }
+
+        public static Instruction FromDefinition(InstructionDefinition def, Register rs, params int[] args)
+        {
+            if (args.Length != def.Arguments.Length)
+                throw new ArgumentException("Wrong number of arguments.");
+
+            Instruction ins = new Instruction
+            {
+                OpCode = def.OpCode
+            };
+
+            if (def.OpCode == OpCode.Register)
+                ins.FunctionCode = def.FunctionCode;
+            if (def.OpCode == OpCode.Branch)
+                ins.BranchCode = def.BranchCode;
+
+            for (int i = 0; i < def.Arguments.Length; i++)
+            {
+                switch (def.Arguments[i])
+                {
+                    case InstructionArgumentType.Rd:
+                        ins.Rd = args[i];
+                        break;
+                    case InstructionArgumentType.Rs:
+                        ins.Rs = args[i];
+                        break;
+                    case InstructionArgumentType.Rt:
+                        ins.Rt = args[i];
+                        break;
+                    case InstructionArgumentType.Sa:
+                        ins.sa = (byte)args[i];
+                        break;
+                    case InstructionArgumentType.Label:
+                    case InstructionArgumentType.Immediate:
+                        ins.Immediate = (ushort)args[i];
+                        break;
+                    case InstructionArgumentType.ImmediateRs:
+                        ins.Immediate = (ushort)args[i];
+                        ins.Rs = (int)rs;
+                        break;
+                }
+            }
+
+            return ins;
+        }
+
         public override string ToString()
         {
             return InstructionDefinition.GetString(this);

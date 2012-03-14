@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace MIPS.Architecture
 {
@@ -429,16 +430,138 @@ namespace MIPS.Architecture
                                                                }.ToDictionary(id => id.Name);
         #endregion
 
-        //#region Macro Instructions
-        //public static Dictionary<string, MacroInstructionDefinition> MacroInstructions = new [] {
-        //    new MacroInstructionDefinition(
-        //            "move", 2,
-        //            (asm, args) => {
-        //                asm.
-        //            }
-        //        ),
-        //}.ToDictionary(mid => mid.Name);
-        //#endregion
+        #region Macro Instructions
+        public static Dictionary<string, MacroInstructionDefinition> MacroInstructions = new[] {
+            // move
+            new MacroInstructionDefinition(
+                    "move", 2,
+                    (asm, args) => {
+                        var Rd = (int)InstructionSet.GetRegister(args[0]);
+                        var Rs = (int)InstructionSet.GetRegister(args[1]);
+                        asm.EmitInstruction("addu", Rd, (int)Register.zero, Rs);
+                    }
+                ),
+            // negate
+            new MacroInstructionDefinition(
+                    "neg", 2,
+                    (asm, args) => {
+                        var Rd = (int)InstructionSet.GetRegister(args[0]);
+                        var Rs = (int)InstructionSet.GetRegister(args[1]);
+                        asm.EmitInstruction("sub", Rd, (int)Register.zero, Rs);
+                    }
+                ),
+            // bitwise not
+            new MacroInstructionDefinition(
+                    "not", 2,
+                    (asm, args) => {
+                        var Rd = (int)InstructionSet.GetRegister(args[0]);
+                        var Rs = (int)InstructionSet.GetRegister(args[1]);
+                        asm.EmitInstruction("nor", Rd, Rs, (int)Register.zero);
+                    }
+                ),
+            // absolute value
+            new MacroInstructionDefinition(
+                    "abs", 2,
+                    (asm, args) => {
+                        Symbol skip = new Symbol();
+                        var Rd = (int)InstructionSet.GetRegister(args[0]);
+                        var Rs = (int)InstructionSet.GetRegister(args[1]);
+                        asm.EmitInstruction("addu", Rd, (int)Register.zero, Rs);
+                        asm.EmitInstruction("bgez", skip, SymbolReferenceType.Immediate, Rs, 0);
+                        asm.EmitInstruction("sub", Rd, (int)Register.zero, Rs);
+                        asm.MarkLabel(skip);
+                    }
+                ),
+            // load immediate
+            new MacroInstructionDefinition(
+                    "li", 2,
+                    (asm, args) => {
+                        var Rt = (int)InstructionSet.GetRegister(args[0]);
+                        var upper = asm.GetImmediate(args[1], SymbolReferenceType.ImmediateUpper);
+                        asm.EmitInstruction("lui", (int)Register.at, upper);
+                        var lower = asm.GetImmediate(args[1], SymbolReferenceType.ImmediateLower);
+                        asm.EmitInstruction("ori", Rt, (int)Register.at, lower);
+                    }
+                ),
+            // load address
+            new MacroInstructionDefinition(
+                    "la", 2,
+                    (asm, args) => {
+                        var Rt = (int)InstructionSet.GetRegister(args[0]);
+                        var upper = asm.GetImmediate(args[1], SymbolReferenceType.ImmediateUpper);
+                        asm.EmitInstruction("lui", (int)Register.at, upper);
+                        var lower = asm.GetImmediate(args[1], SymbolReferenceType.ImmediateLower);
+                        asm.EmitInstruction("ori", Rt, (int)Register.at, lower);
+                    }
+                ),
+            // load word at label
+            new MacroInstructionDefinition(
+                    "lw", 2,
+                    (asm, args) => {
+                        var Rt = (int)InstructionSet.GetRegister(args[0]);
+                        var upper = asm.GetImmediate(args[1], SymbolReferenceType.ImmediateUpper);
+                        asm.EmitInstruction("lui", (int)Register.at, upper);
+                        var lower = asm.GetImmediate(args[1], SymbolReferenceType.ImmediateLower);
+                        asm.EmitIndexedInstruction("ori", Register.at, Rt, lower);
+                    }
+                ),
+            // store word at label
+            new MacroInstructionDefinition(
+                    "sw", 2,
+                    (asm, args) => {
+                        var Rt = (int)InstructionSet.GetRegister(args[0]);
+                        var upper = asm.GetImmediate(args[1], SymbolReferenceType.ImmediateUpper);
+                        asm.EmitInstruction("lui", (int)Register.at, upper);
+                        var lower = asm.GetImmediate(args[1], SymbolReferenceType.ImmediateLower);
+                        asm.EmitIndexedInstruction("sw", Register.at, Rt, lower);
+                    }
+                ),
+            // branch on less than
+            new MacroInstructionDefinition(
+                    "blt", 3,
+                    (asm, args) => {
+                        var Rs = (int)InstructionSet.GetRegister(args[0]);
+                        var Rt = (int)InstructionSet.GetRegister(args[1]);
+                        asm.EmitInstruction("slt", (int)Register.at, Rs, Rt);
+                        var label = asm.GetImmediate(args[2], SymbolReferenceType.Immediate);
+                        asm.EmitInstruction("bne", (int)Register.at, (int)Register.zero, label);
+                    }
+                ),
+            // branch on less than or equal
+            new MacroInstructionDefinition(
+                    "ble", 3,
+                    (asm, args) => {
+                        var Rs = (int)InstructionSet.GetRegister(args[0]);
+                        var Rt = (int)InstructionSet.GetRegister(args[1]);
+                        asm.EmitInstruction("slt", (int)Register.at, Rt, Rs);
+                        var label = asm.GetImmediate(args[2], SymbolReferenceType.Immediate);
+                        asm.EmitInstruction("beq", (int)Register.at, (int)Register.zero, label);
+                    }
+                ),
+            // branch on greater than
+            new MacroInstructionDefinition(
+                    "bgt", 3,
+                    (asm, args) => {
+                        var Rs = (int)InstructionSet.GetRegister(args[0]);
+                        var Rt = (int)InstructionSet.GetRegister(args[1]);
+                        asm.EmitInstruction("slt", (int)Register.at, Rt, Rs);
+                        var label = asm.GetImmediate(args[2], SymbolReferenceType.Immediate);
+                        asm.EmitInstruction("bne", (int)Register.at, (int)Register.zero, label);
+                    }
+                ),
+            // branch on greater than or equal
+            new MacroInstructionDefinition(
+                    "bge", 3,
+                    (asm, args) => {
+                        var Rs = (int)InstructionSet.GetRegister(args[0]);
+                        var Rt = (int)InstructionSet.GetRegister(args[1]);
+                        asm.EmitInstruction("slt", (int)Register.at, Rs, Rt);
+                        var label = asm.GetImmediate(args[2], SymbolReferenceType.Immediate);
+                        asm.EmitInstruction("beq", (int)Register.at, (int)Register.zero, label);
+                    }
+                ),
+        }.ToDictionary(mid => mid.Name);
+        #endregion
 
         public static Dictionary<FunctionCode, InstructionDefinition> InstructionsByFunctionCode { get; private set; }
 
@@ -451,6 +574,24 @@ namespace MIPS.Architecture
             InstructionsByFunctionCode = Instructions.Values.Where(i => i.OpCode == OpCode.Register).ToDictionary(i => i.FunctionCode);
             InstructionsByOpCode = Instructions.Values.Where(i => i.OpCode != OpCode.Register && i.OpCode != OpCode.Branch).ToDictionary(i => i.OpCode);
             InstructionsByBranchCode = Instructions.Values.Where(i => i.OpCode == OpCode.Branch).ToDictionary(i => i.BranchCode);
+        }
+
+        public static int GetRegister(string register)
+        {
+            Regex regex = new Regex(@"^\$(\w+)$");
+            var match = regex.Match(register);
+
+            if (!match.Success)
+                throw new ArgumentException("Register expected.");
+
+            var registerName = match.Groups[1].Value;
+
+            int index;
+            index = Array.IndexOf<string>(InstructionSet.RegisterNames, registerName);
+            if (index == -1)
+                throw new ArgumentException("Invalid register name.");
+
+            return index;
         }
     }
 }

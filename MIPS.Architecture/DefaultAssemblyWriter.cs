@@ -44,7 +44,10 @@ namespace MIPS.Architecture
             foreach (var reference in asm.References)
             {
                 // First, find the symbol and calculate its location in memory.
-                var symbol = asm.Symbols.Where(s => s.Name == reference.Name).SingleOrDefault();
+                var symbol = reference.Symbol;
+                
+                if (symbol == null)
+                    symbol = asm.Symbols.Where(s => s.Name == reference.Name).SingleOrDefault();
 
                 if (symbol == null)
                     throw new Exception("Unresolved reference.");
@@ -100,7 +103,7 @@ namespace MIPS.Architecture
                 }
                 else
                 {
-                    Machine.Memory[(int)referenceOffset] |= (ushort)symbolOffset;
+                    Machine.Memory[(int)referenceOffset >> 2] = Machine.Memory[(int)referenceOffset >> 2] | (ushort)val;
                 }
             }
         }

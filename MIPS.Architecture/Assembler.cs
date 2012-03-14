@@ -55,6 +55,28 @@ namespace MIPS.Architecture
             return symbol;
         }
 
+        public Symbol MarkLabel()
+        {
+            var symbol = new Symbol
+            {
+                Offset = (int)CurrentSection.Offset,
+                Section = CurrentSection.Name
+            };
+
+            Symbols.Add(symbol);
+
+            return symbol;
+        }
+
+
+        public void MarkLabel(Symbol s)
+        {
+            s.Offset = (int)CurrentSection.Offset;
+            s.Section = CurrentSection.Name;
+
+            Symbols.Add(s);
+        }
+
         public void SetContext(string context)
         {
             CurrentContext = GetSection(context).Context;
@@ -125,6 +147,7 @@ namespace MIPS.Architecture
             var args = arg.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToArray();
 
             InstructionDefinition def;
+            MacroInstructionDefinition mdef;
 
             if (InstructionSet.Instructions.TryGetValue(name, out def))
             {
@@ -147,13 +170,13 @@ namespace MIPS.Architecture
                     switch (def.Arguments[i])
                     {
                         case InstructionArgumentType.Rd:
-                            ins.Rd = GetRegister(args[i]);
+                            ins.Rd = InstructionSet.GetRegister(args[i]);
                             break;
                         case InstructionArgumentType.Rs:
-                            ins.Rs = GetRegister(args[i]);
+                            ins.Rs = InstructionSet.GetRegister(args[i]);
                             break;
                         case InstructionArgumentType.Rt:
-                            ins.Rt = GetRegister(args[i]);
+                            ins.Rt = InstructionSet.GetRegister(args[i]);
                             break;
                         case InstructionArgumentType.Sa:
                             ins.sa = byte.Parse(args[i]);
@@ -166,20 +189,26 @@ namespace MIPS.Architecture
                             if (!match.Success)
                                 throw new ArgumentException("Invalid argument.");
 
-                            ins.Rs = GetRegister(match.Groups[2].Value);
+                            ins.Rs = InstructionSet.GetRegister(match.Groups[2].Value);
+                            // GetImmediate() also takes care of symbol references.
                             ins.Immediate = (ushort)GetImmediate(match.Groups[1].Value, SymbolReferenceType.Immediate);
 
                             break;
                         case InstructionArgumentType.Immediate:
                         case InstructionArgumentType.Label:
+                            // GetImmediate() also takes care of symbol references.
                             ins.Immediate = (ushort)GetImmediate(args[i], SymbolReferenceType.Immediate);
                             break;
                     }
                 }
 
                 // Now that the instruction's arguments are encoded, let's emit it into the proper section.
-                CurrentSection.Stream.Write(BitConverter.GetBytes(ins.Encode()), 0, 4);
-                CurrentSection.Offset += 4;
+                EmitInstruction(ins);
+            }
+            else if (InstructionSet.MacroInstructions.TryGetValue(name, out mdef))
+            {
+                // Call the macro instruction's delegate to process it.
+                mdef.Delegate(this, args);
             }
             else
             {
@@ -187,7 +216,57 @@ namespace MIPS.Architecture
             }
         }
 
-        private int GetImmediate(string arg, SymbolReferenceType type)
+        public void EmitInstruction(Instruction ins)
+        {
+            CurrentSection.Stream.Write(BitConverter.GetBytes(ins.Encode()), 0, 4);
+            CurrentSection.Offset += 4;
+        }
+
+        public void EmitInstruction(string name, Symbol symbol, SymbolReferenceType type, params int[] args)
+        {
+            MarkSymbolReference(symbol, type);
+
+            var def = InstructionSet.Instructions[name];
+
+            var ins = Instruction.FromDefinition(def, args);
+
+            CurrentSection.Stream.Write(BitConverter.GetBytes(ins.Encode()), 0, 4);
+            CurrentSection.Offset += 4;
+        }
+
+        public void EmitInstruction(string name, string symbol, SymbolReferenceType type, params int[] args)
+        {
+            MarkSymbolReference(symbol, type);
+
+            var def = InstructionSet.Instructions[name];
+
+            var ins = Instruction.FromDefinition(def, args);
+
+            CurrentSection.Stream.Write(BitConverter.GetBytes(ins.Encode()), 0, 4);
+            CurrentSection.Offset += 4;
+        }
+
+        public void EmitIndexedInstruction(string name, Register rs, params int[] args)
+        {
+            var def = InstructionSet.Instructions[name];
+
+            var ins = Instruction.FromDefinition(def, rs, args);
+
+            CurrentSection.Stream.Write(BitConverter.GetBytes(ins.Encode()), 0, 4);
+            CurrentSection.Offset += 4;
+        }
+
+        public void EmitInstruction(string name, params int[] args)
+        {
+            var def = InstructionSet.Instructions[name];
+
+            var ins = Instruction.FromDefinition(def, args);
+
+            CurrentSection.Stream.Write(BitConverter.GetBytes(ins.Encode()), 0, 4);
+            CurrentSection.Offset += 4;
+        }
+
+        public int GetImmediate(string arg, SymbolReferenceType type)
         {
             int val = 0;
             if (arg.StartsWith("0x"))
@@ -197,27 +276,25 @@ namespace MIPS.Architecture
             else if (!int.TryParse(arg, out val))
             {
                 // Add a symbol reference
-                References.Add(new SymbolReference(this) { Name = arg, Type = type });
+                MarkSymbolReference(arg, type);
             }
-            return val;
+
+            if (type == SymbolReferenceType.ImmediateLower)
+                return (int)((ushort)val);
+            else if (type == SymbolReferenceType.ImmediateUpper)
+                return (int)((ushort)(val >> 16));
+            else
+                return val;
         }
 
-        private static int GetRegister(string register)
+        public void MarkSymbolReference(string symbol, SymbolReferenceType type)
         {
-            Regex regex = new Regex(@"^\$(\w+)$");
-            var match = regex.Match(register);
+            References.Add(new SymbolReference(this) { Name = symbol, Type = type });
+        }
 
-            if (!match.Success)
-                throw new ArgumentException("Register expected.");
-
-            var registerName = match.Groups[1].Value;
-
-            int index;
-            index = Array.IndexOf<string>(InstructionSet.RegisterNames, registerName);
-            if (index == -1)
-                throw new ArgumentException("Invalid register name.");
-
-            return index;
+        public void MarkSymbolReference(Symbol symbol, SymbolReferenceType type)
+        {
+            References.Add(new SymbolReference(this) { Symbol = symbol, Type = type });
         }
 
         private void ProcessAssemblerDirective(string directive)

@@ -339,7 +339,7 @@
             this.tabPageDisassembly.Margin = new System.Windows.Forms.Padding(2);
             this.tabPageDisassembly.Name = "tabPageDisassembly";
             this.tabPageDisassembly.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPageDisassembly.Size = new System.Drawing.Size(460, 225);
+            this.tabPageDisassembly.Size = new System.Drawing.Size(737, 387);
             this.tabPageDisassembly.TabIndex = 0;
             this.tabPageDisassembly.Text = "Disassembly";
             this.tabPageDisassembly.UseVisualStyleBackColor = true;
@@ -369,7 +369,7 @@
             this.tabPageMemory.Margin = new System.Windows.Forms.Padding(2);
             this.tabPageMemory.Name = "tabPageMemory";
             this.tabPageMemory.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPageMemory.Size = new System.Drawing.Size(460, 225);
+            this.tabPageMemory.Size = new System.Drawing.Size(737, 387);
             this.tabPageMemory.TabIndex = 1;
             this.tabPageMemory.Text = "Memory";
             this.tabPageMemory.UseVisualStyleBackColor = true;
