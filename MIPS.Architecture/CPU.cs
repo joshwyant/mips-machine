@@ -81,6 +81,8 @@ namespace MIPS.Architecture
         bool stop = false;
 
         public List<IntPtr> BreakPoints = new List<IntPtr>();
+
+        public long Elapsed;
         #endregion
 
         #region Helper Methods
@@ -258,6 +260,8 @@ namespace MIPS.Architecture
 
             // Increment the program counter
             PC++;
+
+            Elapsed++;
         }
 
         private unsafe void ExecuteRegisterInstruction()
@@ -295,7 +299,9 @@ namespace MIPS.Architecture
                     break;
                 // Jump and Link Register
                 case FunctionCode.jalr:
-                    throw new NotImplementedException();
+                    RF[IR.Rd] = (uint)(PC + 1);
+                    PC = (uint*)RF[IR.Rs] - 1;
+                    break;
                 // System Call
                 case FunctionCode.syscall:
                     // TODO: For now, all syscalls are simulated here.
@@ -384,10 +390,18 @@ namespace MIPS.Architecture
                     break;
                 // Set on Less Than
                 case FunctionCode.slt:
-                    throw new NotImplementedException();
+                    if ((int)RF[IR.Rs] < (int)RF[IR.Rs])
+                        RF[IR.Rd] = 1;
+                    else
+                        RF[IR.Rd] = 0;
+                    break;
                 // Set on Less Than Unsigned
                 case FunctionCode.sltu:
-                    throw new NotImplementedException();
+                    if (RF[IR.Rs] < RF[IR.Rs])
+                        RF[IR.Rd] = 1;
+                    else
+                        RF[IR.Rd] = 0;
+                    break;
                 default:
                     throw new NotImplementedException();
             }
@@ -408,13 +422,25 @@ namespace MIPS.Architecture
                             break;
                         // Branch if Greater Than or Equal to Zero, and Link
                         case BranchCode.bgezal:
-                            throw new NotImplementedException();
+                            if ((int)RF[IR.Rs] >= 0)
+                            {
+                                RF[(int)Register.ra] = (uint)(PC + 1);
+                                PC += unchecked((int)IR.SignExtendedImmediate);
+                            }
+                            break;
                         // Branch if Less than Zero
                         case BranchCode.bltz:
-                            throw new NotImplementedException();
+                            if ((int)RF[IR.Rs] < 0)
+                                PC += unchecked((int)IR.SignExtendedImmediate);
+                            break;
                         // Branch if Less than Zero, and Link
                         case BranchCode.bltzal:
-                            throw new NotImplementedException();
+                            if ((int)RF[IR.Rs] < 0)
+                            {
+                                RF[(int)Register.ra] = (uint)(PC + 1);
+                                PC += unchecked((int)IR.SignExtendedImmediate);
+                            }
+                            break;
                         default:
                             // TODO: Invalid expression instruction?
                             throw new NotImplementedException();
@@ -431,7 +457,9 @@ namespace MIPS.Architecture
                     break;
                 // Branch if Equal
                 case OpCode.beq:
-                    throw new NotImplementedException();
+                    if (RF[IR.Rs] == RF[IR.Rt])
+                        PC += unchecked(IR.SignExtendedImmediate);
+                    break;
                 // Branch if Not Equal
                 case OpCode.bne:
                     if (RF[IR.Rs] != RF[IR.Rt])
@@ -458,20 +486,30 @@ namespace MIPS.Architecture
                     break;
                 // Set on Less Than Immediate
                 case OpCode.slti:
-                    throw new NotImplementedException();
+                    if ((int)RF[IR.Rs] < (int)IR.SignExtendedImmediate)
+                        RF[IR.Rt] = 1;
+                    else
+                        RF[IR.Rt] = 0;
+                    break;
                 // Set on Less Than Immediate Unsigned
                 case OpCode.sltiu:
-                    throw new NotImplementedException();
+                    if (RF[IR.Rs] < IR.Immediate)
+                        RF[IR.Rt] = 1;
+                    else
+                        RF[IR.Rt] = 0;
+                    break;
                 // And Immediate
                 case OpCode.andi:
-                    throw new NotImplementedException();
+                    RF[IR.Rt] = RF[IR.Rs] & IR.Immediate;
+                    break;
                 // Or Immediate
                 case OpCode.ori:
                     RF[IR.Rt] = RF[IR.Rs] | IR.Immediate;
                     break;
                 // Xor Immediate
                 case OpCode.xori:
-                    throw new NotImplementedException();
+                    RF[IR.Rt] = RF[IR.Rs] ^ IR.Immediate;
+                    break;
                 // Load Upper Immediate
                 case OpCode.lui:
                     RF[IR.Rt] = (uint)IR.Immediate << 16;
