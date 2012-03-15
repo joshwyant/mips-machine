@@ -81,6 +81,7 @@ namespace MIPS.Architecture
                 }
                 referenceOffset += (uint)reference.Offset;
 
+
                 // Now, insert the referenced symbol.
                 // First, determine the value we're inserting.
                 uint val = 0;
@@ -89,6 +90,7 @@ namespace MIPS.Architecture
                     case SymbolReferenceType.Immediate:
                     case SymbolReferenceType.ImmediateLower:
                     case SymbolReferenceType.Jump:
+                    case SymbolReferenceType.Branch:
                         val = symbolOffset;
                         break;
                     case SymbolReferenceType.ImmediateUpper:
@@ -96,14 +98,21 @@ namespace MIPS.Architecture
                         break;
                 }
 
+                if (reference.Type == SymbolReferenceType.Branch)
+                    val -= referenceOffset + 4;
+
                 // Next, determine how to write this to memory.
                 if (reference.Type == SymbolReferenceType.Jump)
                 {
-                    throw new NotImplementedException();
+                    Machine.Memory[(int)referenceOffset >> 2] |= (uint)(val >> 2) & 0x3FFFFFF;
+                }
+                else if (reference.Type == SymbolReferenceType.Branch)
+                {
+                    Machine.Memory[(int)referenceOffset >> 2] |= (ushort)(val >> 2);
                 }
                 else
                 {
-                    Machine.Memory[(int)referenceOffset >> 2] = Machine.Memory[(int)referenceOffset >> 2] | (ushort)val;
+                    Machine.Memory[(int)referenceOffset >> 2] |= (ushort)val;
                 }
             }
         }

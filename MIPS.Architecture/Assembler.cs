@@ -183,7 +183,7 @@ namespace MIPS.Architecture
                             break;
                         case InstructionArgumentType.ImmediateRs:
                             // Match arguments of type "immediate ($register)"
-                            Regex regex = new Regex(@"^(\w+)\s*(\$\w+)$");
+                            Regex regex = new Regex(@"^(\w+)\s*\((\$\w+)\)$");
                             var match = regex.Match(args[i]);
 
                             if (!match.Success)
@@ -197,7 +197,7 @@ namespace MIPS.Architecture
                         case InstructionArgumentType.Immediate:
                         case InstructionArgumentType.Label:
                             // GetImmediate() also takes care of symbol references.
-                            ins.Immediate = (ushort)GetImmediate(args[i], SymbolReferenceType.Immediate);
+                            ins.Immediate = (ushort)GetImmediate(args[i], ins.SymbolReferenceType);
                             break;
                     }
                 }
@@ -319,6 +319,22 @@ namespace MIPS.Architecture
                         CurrentSection.Stream.Write(Encoding.ASCII.GetBytes(str), 0, str.Length);
                         CurrentSection.Stream.Write(new byte[] { 0 }, 0, 1);
                         CurrentSection.Offset += str.Length + 1;
+
+                        break;
+                    case ".word":
+                        var word = parts[1].Split(new[] {' ', '\t', ':'}, StringSplitOptions.RemoveEmptyEntries);
+
+                        int count = 1;
+                        int writeword = GetImmediate(word[0], SymbolReferenceType.Immediate);
+
+                        if (word.Length != 1)
+                            count = int.Parse(word[1]);
+
+                        for (int i = 0; i < count; i++)
+                        {
+                            CurrentSection.Stream.Write(BitConverter.GetBytes(writeword), 0, 4);
+                            CurrentSection.Offset += 4;
+                        }
 
                         break;
                     default:

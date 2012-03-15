@@ -48,6 +48,19 @@ namespace MIPS.Architecture
             }
         }
 
+        public SymbolReferenceType SymbolReferenceType
+        {
+            get
+            {
+                if (OpCode == Architecture.OpCode.Branch || (((int)OpCode & 0x3C) == 0x4))
+                    return Architecture.SymbolReferenceType.Branch;
+                else if (OpCode == Architecture.OpCode.j || OpCode == Architecture.OpCode.jal)
+                    return Architecture.SymbolReferenceType.Jump;
+                else
+                    return Architecture.SymbolReferenceType.Immediate;
+            }
+        }
+
         /// <summary>
         /// The shift amount for shift instructions.
         /// </summary>
@@ -94,7 +107,7 @@ namespace MIPS.Architecture
             else
             {
                 // If this is a jump instruction (OpCode = 00001?b), encode the target
-                instruction |= (uint)Target & 0x3FFFFFF;
+                instruction |= (uint)(Target >> 2) & 0x3FFFFFF;
             }
 
             return instruction;
@@ -297,6 +310,7 @@ namespace MIPS.Architecture
                         break;
                     case InstructionArgumentType.Label:
                     case InstructionArgumentType.Immediate:
+                        ins.Target = args[i];
                         ins.Immediate = (ushort)args[i];
                         break;
                     case InstructionArgumentType.ImmediateRs:

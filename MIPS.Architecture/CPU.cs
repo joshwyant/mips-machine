@@ -251,10 +251,6 @@ namespace MIPS.Architecture
             {
                 ExecuteRegisterInstruction();
             }
-            else if (IR.OpCode == OpCode.j || IR.OpCode == OpCode.jal)
-            {
-                throw new NotImplementedException();
-            }
             else
             {
                 ExecuteImmediateInstruction();
@@ -295,7 +291,8 @@ namespace MIPS.Architecture
                     break;
                 // Jump Register
                 case FunctionCode.jr:
-                    throw new NotImplementedException();
+                    PC = (uint*)RF[IR.Rs] - 1;
+                    break;
                 // Jump and Link Register
                 case FunctionCode.jalr:
                     throw new NotImplementedException();
@@ -425,10 +422,13 @@ namespace MIPS.Architecture
                     break;
                 // The Jump instruction
                 case OpCode.j:
-                    throw new NotImplementedException();
+                    PC = (uint*)(IR.Target << 2) - 1;
+                    break;
                 // The Jump and Link (call procedure) instruction
                 case OpCode.jal:
-                    throw new NotImplementedException();
+                    RF[(int)Register.ra] = (uint)(PC + 1);
+                    PC = (uint*)(IR.Target << 2) - 1;
+                    break;
                 // Branch if Equal
                 case OpCode.beq:
                     throw new NotImplementedException();
@@ -444,15 +444,17 @@ namespace MIPS.Architecture
                     break;
                 // Branch if Greater than Zero
                 case OpCode.bgtz:
-                    throw new NotImplementedException();
+                    if ((int)RF[IR.Rs] > 0)
+                        PC += unchecked(IR.SignExtendedImmediate);
+                    break;
                 // Add Immediate
                 case OpCode.addi:
                     // TODO: Overflow exception
-                    RF[IR.Rt] = RF[IR.Rs] + IR.SignExtendedImmediate;
+                    RF[IR.Rt] = RF[IR.Rs] + (IR.SignExtendedImmediate);
                     break;
                 // Add Immediate Unsigned
                 case OpCode.addiu:
-                    RF[IR.Rt] = RF[IR.Rs] + IR.SignExtendedImmediate;
+                    RF[IR.Rt] = RF[IR.Rs] + (IR.SignExtendedImmediate);
                     break;
                 // Set on Less Than Immediate
                 case OpCode.slti:
@@ -488,7 +490,8 @@ namespace MIPS.Architecture
                     throw new NotImplementedException();
                 // Load Word
                 case OpCode.lw:
-                    throw new NotImplementedException();
+                    RF[IR.Rt] = Machine.Memory[(int)((RF[IR.Rs] + IR.SignExtendedImmediate) >> 2)];
+                    break;
                 // Load Byte Unsigned
                 case OpCode.lbu:
                     throw new NotImplementedException();
@@ -509,7 +512,8 @@ namespace MIPS.Architecture
                     throw new NotImplementedException();
                 // Store Word
                 case OpCode.sw:
-                    throw new NotImplementedException();
+                    Machine.Memory[(int)((RF[IR.Rs] + IR.SignExtendedImmediate) >> 2)] = RF[IR.Rt];
+                    break;
                 // Store Word Right
                 case OpCode.swr:
                     throw new NotImplementedException();
