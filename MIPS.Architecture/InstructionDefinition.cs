@@ -51,7 +51,10 @@ namespace MIPS.Architecture
                     return "$" + InstructionSet.RegisterNames[ins.Rd];
                 case InstructionArgumentType.Immediate:
                 case InstructionArgumentType.Label:
-                    return "0x" + ins.Immediate.ToString("X");
+                    if (ins.OpCode == OpCode.j || ins.OpCode == OpCode.jal)
+                        return "0x" + ins.Target.ToString("X");
+                    else
+                        return "0x" + ins.Immediate.ToString("X");
                 case InstructionArgumentType.ImmediateRs:
                     return string.Format("{1}(${0})", InstructionSet.RegisterNames[ins.Rs], ins.Immediate);
                 default:

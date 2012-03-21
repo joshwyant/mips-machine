@@ -126,6 +126,9 @@ namespace MIPS.Architecture
                 snippet = snippet.Substring(snippet.IndexOf(':') + 1).Trim();
             }
 
+            if (string.IsNullOrEmpty(snippet))
+                return;
+
             if (snippet.StartsWith("."))
             {
                 // Process assembler directives
@@ -304,7 +307,7 @@ namespace MIPS.Architecture
                 SetContext(directive);
             else
             {
-                var parts = directive.Split(new[] {' '}, 2);
+                var parts = directive.Split(new[] {' ', '\t'}, 2);
                 var name = parts[0];
 
                 switch (name)
@@ -319,6 +322,13 @@ namespace MIPS.Architecture
                         CurrentSection.Stream.Write(Encoding.ASCII.GetBytes(str), 0, str.Length);
                         CurrentSection.Stream.Write(new byte[] { 0 }, 0, 1);
                         CurrentSection.Offset += str.Length + 1;
+
+                        break;
+
+                    case ".globl":
+                        var main = parts[1].Trim();
+                        
+                        ///
 
                         break;
                     case ".word":

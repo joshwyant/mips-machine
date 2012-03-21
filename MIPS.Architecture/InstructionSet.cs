@@ -537,7 +537,7 @@ namespace MIPS.Architecture
                         var Rs = (int)InstructionSet.GetRegister(args[0]);
                         var Rt = (int)InstructionSet.GetRegister(args[1]);
                         asm.EmitInstruction("slt", (int)Register.at, Rs, Rt);
-                        var label = asm.GetImmediate(args[2], SymbolReferenceType.Immediate);
+                        var label = asm.GetImmediate(args[2], SymbolReferenceType.Branch);
                         asm.EmitInstruction("bne", (int)Register.at, (int)Register.zero, label);
                     }
                 ),
@@ -548,7 +548,7 @@ namespace MIPS.Architecture
                         var Rs = (int)InstructionSet.GetRegister(args[0]);
                         var Rt = (int)InstructionSet.GetRegister(args[1]);
                         asm.EmitInstruction("slt", (int)Register.at, Rt, Rs);
-                        var label = asm.GetImmediate(args[2], SymbolReferenceType.Immediate);
+                        var label = asm.GetImmediate(args[2], SymbolReferenceType.Branch);
                         asm.EmitInstruction("beq", (int)Register.at, (int)Register.zero, label);
                     }
                 ),
@@ -559,7 +559,7 @@ namespace MIPS.Architecture
                         var Rs = (int)InstructionSet.GetRegister(args[0]);
                         var Rt = (int)InstructionSet.GetRegister(args[1]);
                         asm.EmitInstruction("slt", (int)Register.at, Rt, Rs);
-                        var label = asm.GetImmediate(args[2], SymbolReferenceType.Immediate);
+                        var label = asm.GetImmediate(args[2], SymbolReferenceType.Branch);
                         asm.EmitInstruction("bne", (int)Register.at, (int)Register.zero, label);
                     }
                 ),
@@ -570,8 +570,16 @@ namespace MIPS.Architecture
                         var Rs = (int)InstructionSet.GetRegister(args[0]);
                         var Rt = (int)InstructionSet.GetRegister(args[1]);
                         asm.EmitInstruction("slt", (int)Register.at, Rs, Rt);
-                        var label = asm.GetImmediate(args[2], SymbolReferenceType.Immediate);
+                        var label = asm.GetImmediate(args[2], SymbolReferenceType.Branch);
                         asm.EmitInstruction("beq", (int)Register.at, (int)Register.zero, label);
+                    }
+                ),
+            // branch on greater than or equal
+            new MacroInstructionDefinition(
+                    "b", 1,
+                    (asm, args) => {
+                        var label = asm.GetImmediate(args[0], SymbolReferenceType.Branch);
+                        asm.EmitInstruction("beq", (int)Register.zero, (int)Register.zero, label);
                     }
                 ),
         }.ToDictionary(mid => mid.Name);
@@ -592,6 +600,8 @@ namespace MIPS.Architecture
 
         public static int GetRegister(string register)
         {
+            int index;
+
             Regex regex = new Regex(@"^\$(\w+)$");
             var match = regex.Match(register);
 
@@ -600,10 +610,13 @@ namespace MIPS.Architecture
 
             var registerName = match.Groups[1].Value;
 
-            int index;
-            index = Array.IndexOf<string>(InstructionSet.RegisterNames, registerName);
-            if (index == -1)
-                throw new ArgumentException("Invalid register name.");
+
+            if (!int.TryParse(registerName, out index))
+            {
+                index = Array.IndexOf<string>(InstructionSet.RegisterNames, registerName);
+                if (index == -1)
+                    throw new ArgumentException("Invalid register name.");
+            }
 
             return index;
         }

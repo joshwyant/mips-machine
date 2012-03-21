@@ -120,13 +120,23 @@ namespace MIPS.Architecture
             // Create the thread for running the CPU
             WorkerThread = new Thread(Run);
 
-            // Allocate memory for the 32 general purpose registers and initialize each of them to zero.
+            // Allocate memory for the 32 general purpose registers
             unsafe
             {
                 RF = (uint*)System.Runtime.InteropServices.Marshal.AllocHGlobal(32 * 4);
-                for (int i = 0; i < 32; i++)
-                    RF[i] = 0;
             }
+
+            Initialize();
+        }
+
+        unsafe void Initialize()
+        {
+            // Initialize each of the registers to zero.
+            for (int i = 0; i < 32; i++)
+                RF[i] = 0;
+
+            // Initialize the stack pointer
+            RF[(int)Register.sp] = 0x7fffeffc;
         }
         #endregion
 

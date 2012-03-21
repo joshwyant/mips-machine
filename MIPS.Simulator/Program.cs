@@ -21,7 +21,8 @@ namespace MIPS.Simulator
 
             // Map the data and text segments
             mips.Memory.Map(0x00400000, 0x1000FFFC, 0x00800000); // Text segment
-            mips.Memory.Map(0x10010000, 0xFFFFFFFC, 0x00810000); // Data segment
+            mips.Memory.Map(0x10010000, 0x6FFFFFFC, 0x00810000); // Data segment
+            mips.Memory.Map(0x7FFF0000, 0xFFFFFFFC, 0x00C00000); // Stack
             mips.Memory.Map(0x80000000, 0x007FFFFC, 0x00100000); // Video memory
 
             // Fill the text segment
