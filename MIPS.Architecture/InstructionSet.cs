@@ -582,7 +582,7 @@ namespace MIPS.Architecture
                         asm.EmitInstruction("beq", (int)Register.zero, (int)Register.zero, label);
                     }
                 ),
-        }.ToDictionary(mid => mid.Name);
+        }.ToDictionary(macro => macro.Name);
         #endregion
 
         public static Dictionary<FunctionCode, InstructionDefinition> InstructionsByFunctionCode { get; private set; }

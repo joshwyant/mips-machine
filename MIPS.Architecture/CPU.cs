@@ -587,13 +587,13 @@ namespace MIPS.Architecture
                 // Print String, a0 = address of string in memory
                 case 4:
                     int addr = (int)RF[(int)Register.a0];
-                    int offset = addr % 4;
+                    int offset = addr % 4 + 3;
                     addr >>= 2;
                     while (true)
                     {
                         uint word = Machine.Memory[addr];
                         byte b = 0;
-                        while (offset < 4)
+                        while (offset >= 0)
                         {
                             b = (byte)(word >> (offset * 8));
                             if (b == 0)
@@ -602,9 +602,9 @@ namespace MIPS.Architecture
                                 Console.WriteLine();
                             else
                                 Console.Write((char)b);
-                            offset++;
+                            offset--;
                         }
-                        offset = 0;
+                        offset = 3;
                         if (b == 0)
                             break;
                         addr++;

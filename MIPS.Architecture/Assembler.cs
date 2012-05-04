@@ -319,9 +319,24 @@ namespace MIPS.Architecture
 
                         str = str.Substring(1, str.Length - 2).Replace(@"\\", "\\").Replace(@"\r", "\r").Replace(@"\n", "\n");
 
-                        CurrentSection.Stream.Write(Encoding.ASCII.GetBytes(str), 0, str.Length);
-                        CurrentSection.Stream.Write(new byte[] { 0 }, 0, 1);
-                        CurrentSection.Offset += str.Length + 1;
+                        // Create a long enough array and copy the string + a null character + padding.
+                        var bytes = new byte[((str.Length + 1) * 4 + 3) / 4];
+                        Array.Copy(Encoding.ASCII.GetBytes(str), bytes, str.Length);
+
+                        // Convert to big endian
+                        for (int i = 0; i < bytes.Length; i += 4)
+                        {
+                            var a = bytes[i];
+                            var b = bytes[i + 1];
+
+                            bytes[i] = bytes[i + 3];
+                            bytes[i + 1] = bytes[i + 2];
+                            bytes[i + 2] = b;
+                            bytes[i + 3] = a;
+                        }
+
+                        CurrentSection.Stream.Write(bytes, 0, bytes.Length);
+                        CurrentSection.Offset += bytes.Length;
 
                         break;
 

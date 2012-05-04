@@ -34,6 +34,8 @@ namespace MIPS.Architecture
         /// </summary>
         public ushort Immediate;
 
+        public uint? OriginalInstruction;
+
         /// <summary>
         /// Gets the immediate word, sign-extended.
         /// </summary>
@@ -115,6 +117,7 @@ namespace MIPS.Architecture
 
         public Instruction(uint word)
         {
+
             // Initialize the structure.
             Rs = 0;
             Rt = 0;
@@ -123,6 +126,7 @@ namespace MIPS.Architecture
             sa = 0;
             FunctionCode = 0;
             Target = 0;
+            OriginalInstruction = word;
 
             // Get the instruction's OpCode.
             OpCode = (OpCode)(word >> 26);
@@ -174,6 +178,7 @@ namespace MIPS.Architecture
             sa = 0;
             FunctionCode = 0;
             Target = 0;
+            OriginalInstruction = null;
         }
 
         public Instruction(OpCode opCode, Register rs, Register rd)
@@ -186,6 +191,7 @@ namespace MIPS.Architecture
             Immediate = 0;
             FunctionCode = 0;
             Target = 0;
+            OriginalInstruction = null;
         }
 
         public Instruction(FunctionCode shiftCode, Register rt, Register rd, int shiftAmount)
@@ -198,6 +204,7 @@ namespace MIPS.Architecture
             Immediate = 0;
             FunctionCode = shiftCode;
             Target = 0;
+            OriginalInstruction = null;
         }
 
         public Instruction(FunctionCode functionCode, Register rs, Register rt, ushort immediate)
@@ -210,6 +217,7 @@ namespace MIPS.Architecture
             Immediate = immediate;
             FunctionCode = functionCode;
             Target = 0;
+            OriginalInstruction = null;
         }
 
         public Instruction(FunctionCode functionCode, Register rs, ushort immediate)
@@ -222,6 +230,7 @@ namespace MIPS.Architecture
             Immediate = immediate;
             FunctionCode = functionCode;
             Target = 0;
+            OriginalInstruction = null;
         }
 
         public Instruction(FunctionCode functionCode, Register rs, Register rt)
@@ -234,6 +243,7 @@ namespace MIPS.Architecture
             sa = 0;
             FunctionCode = functionCode;
             Target = 0;
+            OriginalInstruction = null;
         }
 
         public Instruction(FunctionCode functionCode, Register rs)
@@ -246,6 +256,7 @@ namespace MIPS.Architecture
             sa = 0;
             FunctionCode = functionCode;
             Target = 0;
+            OriginalInstruction = null;
         }
 
         public Instruction(FunctionCode functionCode, ushort immediate)
@@ -258,6 +269,7 @@ namespace MIPS.Architecture
             sa = 0;
             FunctionCode = functionCode;
             Target = 0;
+            OriginalInstruction = null;
         }
 
         public Instruction(OpCode jumpCode, int target)
@@ -270,6 +282,7 @@ namespace MIPS.Architecture
             sa = 0;
             FunctionCode = 0;
             Target = target;
+            OriginalInstruction = null;
         }
 
         public static Instruction FromDefinition(InstructionDefinition def, params int[] args)

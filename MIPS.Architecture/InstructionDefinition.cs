@@ -52,7 +52,7 @@ namespace MIPS.Architecture
                 case InstructionArgumentType.Immediate:
                 case InstructionArgumentType.Label:
                     if (ins.OpCode == OpCode.j || ins.OpCode == OpCode.jal)
-                        return "0x" + ins.Target.ToString("X");
+                        return "0x" + (ins.Target << 2).ToString("X");
                     else
                         return "0x" + ins.Immediate.ToString("X");
                 case InstructionArgumentType.ImmediateRs:
@@ -85,6 +85,11 @@ namespace MIPS.Architecture
         /// </summary>
         public static string GetString(Instruction ins)
         {
+            if (ins.OriginalInstruction.HasValue && ins.OriginalInstruction.Value == 0)
+            {
+                return "null";
+            }
+
             // Get the instruction definition for this instruction
             var def = InstructionDefinition.ForInstruction(ins);
 

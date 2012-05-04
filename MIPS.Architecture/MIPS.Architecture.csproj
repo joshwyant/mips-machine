@@ -33,6 +33,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ELFSharp">
+      <HintPath>..\ELFSharp.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -48,6 +51,7 @@
     <Compile Include="BranchCode.cs" />
     <Compile Include="CPU.cs" />
     <Compile Include="DefaultAssemblyWriter.cs" />
+    <Compile Include="ElfLoader.cs" />
     <Compile Include="FunctionCode.cs" />
     <Compile Include="SymbolReferenceType.cs" />
     <Compile Include="Instruction.cs" />
