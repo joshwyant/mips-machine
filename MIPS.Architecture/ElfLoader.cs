@@ -32,21 +32,6 @@ namespace MIPS.Architecture
                 // Get the binary data for the section
                 var data = header.GetContents();
 
-                // Convert to little endian
-                if (elf.Endianess == Endianess.BigEndian)
-                {
-                    for (int i = 0; i < data.Length; i += 4)
-                    {
-                        var a = data[i];
-                        var b = data[i + 1];
-
-                        data[i] = data[i + 3];
-                        data[i + 1] = data[i + 2];
-                        data[i + 2] = b;
-                        data[i + 3] = a;
-                    }
-                }
-
                 // Copy the data
                 for (int i = 0; i < data.Length; i += 4)
                 {

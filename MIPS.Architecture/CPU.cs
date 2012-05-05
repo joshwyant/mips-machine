@@ -140,6 +140,7 @@ namespace MIPS.Architecture
         }
         #endregion
 
+        #region Control Methods
         // Runs on the worker thread
         private void Run()
         {
@@ -227,12 +228,14 @@ namespace MIPS.Architecture
             // Signal the CPU to execute the next instruction
             TrapSync.Set();
         }
+        #endregion
 
+        #region Execution Methods
         private unsafe void Step()
         {
             // Fetch the next instruction
-            int pc = unchecked((int)PC);
-            IR = new Instruction(Machine.Memory[pc >> 2]);
+            var pc = unchecked((uint)PC);
+            IR = new Instruction(Machine.Memory.GetWord(pc));
 
 
             // Raise events
@@ -529,38 +532,44 @@ namespace MIPS.Architecture
                     throw new NotImplementedException();
                 // Load Byte
                 case OpCode.lb:
-                    throw new NotImplementedException();
+                    RF[IR.Rt] = (uint)(int)(sbyte)Machine.Memory.GetByte(RF[IR.Rs] + IR.SignExtendedImmediate);
+                    break;
                 // Load Halfword
                 case OpCode.lh:
-                    throw new NotImplementedException();
+                    RF[IR.Rt] = (uint)(int)(short)Machine.Memory.GetShort(RF[IR.Rs] + IR.SignExtendedImmediate);
+                    break;
                 // Load Word Left
                 case OpCode.lwl:
                     throw new NotImplementedException();
                 // Load Word
                 case OpCode.lw:
-                    RF[IR.Rt] = Machine.Memory[(int)((RF[IR.Rs] + IR.SignExtendedImmediate) >> 2)];
+                    RF[IR.Rt] = Machine.Memory.GetWord(RF[IR.Rs] + IR.SignExtendedImmediate);
                     break;
                 // Load Byte Unsigned
                 case OpCode.lbu:
-                    throw new NotImplementedException();
+                    RF[IR.Rt] = Machine.Memory.GetByte(RF[IR.Rs] + IR.SignExtendedImmediate);
+                    break;
                 // Load Halfword Unsigned
                 case OpCode.lhu:
-                    throw new NotImplementedException();
+                    RF[IR.Rt] = Machine.Memory.GetShort(RF[IR.Rs] + IR.SignExtendedImmediate);
+                    break;
                 // Load Word Right
                 case OpCode.lwr:
                     throw new NotImplementedException();
                 // Store Byte
                 case OpCode.sb:
-                    throw new NotImplementedException();
+                    Machine.Memory.SetByte(RF[IR.Rs] + IR.SignExtendedImmediate, (byte)RF[IR.Rt]);
+                    break;
                 // Store Halfword
                 case OpCode.sh:
-                    throw new NotImplementedException();
+                    Machine.Memory.SetShort(RF[IR.Rs] + IR.SignExtendedImmediate, (ushort)RF[IR.Rt]);
+                    break;
                 // Store Word Left
                 case OpCode.swl:
                     throw new NotImplementedException();
                 // Store Word
                 case OpCode.sw:
-                    Machine.Memory[(int)((RF[IR.Rs] + IR.SignExtendedImmediate) >> 2)] = RF[IR.Rt];
+                    Machine.Memory.SetWord(RF[IR.Rs] + IR.SignExtendedImmediate, RF[IR.Rt]);
                     break;
                 // Store Word Right
                 case OpCode.swr:
@@ -569,7 +578,9 @@ namespace MIPS.Architecture
                     throw new NotImplementedException();
             }
         }
+        #endregion
 
+        #region Syscall
         private unsafe void Syscall()
         {
             switch (RF[(int)Register.v0])
@@ -587,13 +598,13 @@ namespace MIPS.Architecture
                 // Print String, a0 = address of string in memory
                 case 4:
                     int addr = (int)RF[(int)Register.a0];
-                    int offset = addr % 4 + 3;
+                    int offset = addr % 4;
                     addr >>= 2;
                     while (true)
                     {
                         uint word = Machine.Memory[addr];
                         byte b = 0;
-                        while (offset >= 0)
+                        while (offset < 4)
                         {
                             b = (byte)(word >> (offset * 8));
                             if (b == 0)
@@ -602,9 +613,9 @@ namespace MIPS.Architecture
                                 Console.WriteLine();
                             else
                                 Console.Write((char)b);
-                            offset--;
+                            offset++;
                         }
-                        offset = 3;
+                        offset = 0;
                         if (b == 0)
                             break;
                         addr++;
@@ -634,5 +645,6 @@ namespace MIPS.Architecture
                     break;
             }
         }
+        #endregion
     }
 }

@@ -22,10 +22,10 @@ namespace MIPS.Simulator
             Console.WriteLine("Hypothetical Machine Simulator based on MIPS, written by Josh Wyant");
 
             // Create a program
-            //var toolchain = new ElfToolchain(path, prefix);
-            //var lib = new[] { "syscalls.c" };
-            //var sources = new[] { "source.c" };
-            //toolchain.ExecuteTool("gcc", string.Format("-o {0} {1}", program, string.Join(" ", sources.Union(lib))));
+            var toolchain = new ElfToolchain(path, prefix);
+            var lib = new[] { "syscalls.c" };
+            var sources = new[] { "source.c" };
+            toolchain.ExecuteTool("gcc", string.Format("-o {0} {1}", program, string.Join(" ", sources.Union(lib))));
 
             // Create a new MIPS machine with 32MB of RAM.
             Machine mips = new Machine(32); 
