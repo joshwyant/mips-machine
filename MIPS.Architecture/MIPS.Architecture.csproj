@@ -50,6 +50,7 @@
     <Compile Include="AssemblyWriter.cs" />
     <Compile Include="BranchCode.cs" />
     <Compile Include="CPU.cs" />
+    <Compile Include="Debugger.cs" />
     <Compile Include="DefaultAssemblyWriter.cs" />
     <Compile Include="ElfLoader.cs" />
     <Compile Include="FunctionCode.cs" />

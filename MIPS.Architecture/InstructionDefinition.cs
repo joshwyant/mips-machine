@@ -57,6 +57,8 @@ namespace MIPS.Architecture
                         return "0x" + ins.Immediate.ToString("X");
                 case InstructionArgumentType.ImmediateRs:
                     return string.Format("{1}(${0})", InstructionSet.RegisterNames[ins.Rs], ins.Immediate);
+                case InstructionArgumentType.Sa:
+                    return ins.sa.ToString();
                 default:
                     return string.Empty;
             }

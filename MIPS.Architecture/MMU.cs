@@ -15,15 +15,15 @@ namespace MIPS.Architecture
             set
             {
                 isBigEndian = value;
-                if (value)
+                if (isBigEndian == BitConverter.IsLittleEndian)
                 {
-                    getShort = getShortBigEndian;
-                    getWord = getWordBigEndian;
+                    getShort = getShortByteSwapped;
+                    getWord = getWordByteSwapped;
                 }
                 else
                 {
-                    getShort = getShortLittleEndian;
-                    getWord = getWordLittleEndian;
+                    getShort = getShortUnchanged;
+                    getWord = getWordUnchanged;
                 }
             }
         }
@@ -64,7 +64,7 @@ namespace MIPS.Architecture
                 RawMemory = (uint*)System.Runtime.InteropServices.Marshal.AllocHGlobal(memoryInMB << 20);
             }
             Mappings = new List<Tuple<int, int, int>>();
-            IsBigEndian = true;
+            IsBigEndian = false;
         }
 
         public void Map(uint startVirtualAddress, uint lastVirtualAddress, uint startPhysicalAddress)
@@ -79,23 +79,23 @@ namespace MIPS.Architecture
         GetShortDelegate getShort;
         GetWordDelegate getWord;
 
-        static ushort getShortBigEndian(ushort value)
+        static ushort getShortByteSwapped(ushort value)
         {
             
             return (ushort)((value >> 8) | (value << 8));
         }
 
-        static ushort getShortLittleEndian(ushort value)
+        static ushort getShortUnchanged(ushort value)
         {
             return value;
         }
 
-        static uint getWordBigEndian(uint value)
+        static uint getWordByteSwapped(uint value)
         {
             return (value >> 24) | ((value & 0x00FF0000) >> 8) | ((value & 0x0000FF00) << 8) | (value << 24);
         }
 
-        static uint getWordLittleEndian(uint value)
+        static uint getWordUnchanged(uint value)
         {
             return value;
         }
@@ -142,7 +142,7 @@ namespace MIPS.Architecture
             var shift = offset * 8;
 
             // Long word mask based on length of word
-            var newWordMask = 0xFFFFFFFFUL >> ((wordLength - 4) * 8); // 0xFF x (number of bytes in word)
+            var newWordMask = ~(~0UL << (wordLength * 8)); // 0xFF x (number of bytes in word)
             newWordMask <<= shift;
 
             // Mask for preserving surrounding bytes

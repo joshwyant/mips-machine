@@ -50,6 +50,8 @@ namespace MIPS.Architecture
         /// </summary>
         private ManualResetEvent TrapSync = new ManualResetEvent(false);
 
+        public ManualResetEvent SyscallSync = new ManualResetEvent(false);
+
         /// <summary>
         /// Occurs when a breakpoint is hit.
         /// </summary>
@@ -74,6 +76,11 @@ namespace MIPS.Architecture
         /// Exit Syscall
         /// </summary>
         public event EventHandler ExitSyscall;
+
+        /// <summary>
+        /// yscall
+        /// </summary>
+        public event EventHandler Syscall;
 
         // If true, pause execution at the next opportunity.
         bool pause = false;
@@ -144,10 +151,12 @@ namespace MIPS.Architecture
         // Runs on the worker thread
         private void Run()
         {
+            isRunning = true;
             while (!stop)
             {
                 Step();
             }
+            isRunning = false;
 
             stop = false;
         }
@@ -185,6 +194,10 @@ namespace MIPS.Architecture
                 // TODO: I think this is the right way to do it.
                 if (Thread.CurrentThread != WorkerThread)
                 {
+                    // TODO: I'm not sure if this is a good idea, but it gets the thread to stop.
+                    TrapSync.Set();
+                    SyscallSync.Set();
+
                     WorkerThread.Join();
                 }
             }
@@ -255,11 +268,11 @@ namespace MIPS.Architecture
             // Pause CPU execution
             if (pause || BreakPoints.Contains((IntPtr)pc) || SingleStep)
             {
-                pause = false;
                 // System.Diagnostics.Debugger.Break();
                 // Suspend this thread and wait for the CPU to be resumed
                 TrapSync.Reset();
                 TrapSync.WaitOne();
+                pause = false;
             }
 
             if (IR.OpCode == OpCode.Register)
@@ -308,17 +321,18 @@ namespace MIPS.Architecture
                     break;
                 // Jump Register
                 case FunctionCode.jr:
-                    PC = (uint*)RF[IR.Rs] - 1;
+                    PC = (uint*)RF[IR.Rs];
                     break;
                 // Jump and Link Register
                 case FunctionCode.jalr:
                     RF[IR.Rd] = (uint)(PC + 1);
-                    PC = (uint*)RF[IR.Rs] - 1;
+                    PC = (uint*)RF[IR.Rs];
                     break;
                 // System Call
                 case FunctionCode.syscall:
-                    // TODO: For now, all syscalls are simulated here.
-                    Syscall();
+                    SyscallSync.Reset();
+                    RaiseEventOnUIThread(Syscall, this, null);
+                    SyscallSync.WaitOne();
                     break;
                 // Move From High
                 case FunctionCode.mfhi:
@@ -403,14 +417,14 @@ namespace MIPS.Architecture
                     break;
                 // Set on Less Than
                 case FunctionCode.slt:
-                    if ((int)RF[IR.Rs] < (int)RF[IR.Rs])
+                    if ((int)RF[IR.Rs] < (int)RF[IR.Rt])
                         RF[IR.Rd] = 1;
                     else
                         RF[IR.Rd] = 0;
                     break;
                 // Set on Less Than Unsigned
                 case FunctionCode.sltu:
-                    if (RF[IR.Rs] < RF[IR.Rs])
+                    if (RF[IR.Rs] < RF[IR.Rt])
                         RF[IR.Rd] = 1;
                     else
                         RF[IR.Rd] = 0;
@@ -574,77 +588,21 @@ namespace MIPS.Architecture
                 // Store Word Right
                 case OpCode.swr:
                     throw new NotImplementedException();
+                // MIPS III Instruction Doubleword Divide Unsigned
+                case OpCode.ddivu:
+                    Low = RF[IR.Rs] / RF[IR.Rt];
+                    High = RF[IR.Rs] % RF[IR.Rt];
+                    break;
                 default:
                     throw new NotImplementedException();
             }
         }
         #endregion
 
-        #region Syscall
-        private unsafe void Syscall()
-        {
-            switch (RF[(int)Register.v0])
-            {
-                // Print Integer, a0 = number to be printed
-                case 1:
-                    Console.Write((int)RF[(int)Register.a0]);
-                    break;
-                // Print Float, a0 = number to be printed
-                case 2:
-                    throw new NotImplementedException();
-                // Print Double, a0 = number to be printed
-                case 3:
-                    throw new NotImplementedException();
-                // Print String, a0 = address of string in memory
-                case 4:
-                    int addr = (int)RF[(int)Register.a0];
-                    int offset = addr % 4;
-                    addr >>= 2;
-                    while (true)
-                    {
-                        uint word = Machine.Memory[addr];
-                        byte b = 0;
-                        while (offset < 4)
-                        {
-                            b = (byte)(word >> (offset * 8));
-                            if (b == 0)
-                                break;
-                            if (b == 10)
-                                Console.WriteLine();
-                            else
-                                Console.Write((char)b);
-                            offset++;
-                        }
-                        offset = 0;
-                        if (b == 0)
-                            break;
-                        addr++;
-                    }
-                    break;
-                // Read Integer, Number returned in v0
-                case 5:
-                    RF[(int)Register.v0] = (uint)int.Parse(Console.ReadLine());
-                    break;
-                // Read Float, Number returned in f0
-                case 6:
-                    throw new NotImplementedException();
-                // Read Double, Number returned in f0
-                case 7:
-                    throw new NotImplementedException();
-                // Read String, a0 = address of input buffer in memory, a1 = length of buffer (n)
-                case 8:
-                    throw new NotImplementedException();
-                // Sbrk, a0 = amount, address returned in v0
-                case 9:
-                    throw new NotImplementedException();
-                // Exit
-                case 10:
-                    RaiseEventOnUIThread(ExitSyscall, this, null);
-                    // TODO: Halt better
-                    while (!stop) ;
-                    break;
-            }
-        }
-        #endregion
+        bool isRunning = false;
+
+        public bool IsRunning { get { return isRunning; } }
+
+        public bool IsPaused { get { return pause; } }
     }
 }

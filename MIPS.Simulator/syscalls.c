@@ -1,5 +1,7 @@
 ﻿#include "syscalls.h"
 
+extern void main();
+
 void __start()
 {
 	// Call the "main" function.
@@ -21,6 +23,21 @@ void print(const char *str)
 		 : : "m" (*str)
 	     : "v0", "a0"
 		 );
+}
+
+int getint()
+{
+	int result;
+
+	// Get integer syscall
+	asm ("li $v0, 5\n\t"
+		 "syscall\n\t"
+		 "addu %0, $0, $v0"
+		 : "=r" (result)
+		 : : "v0"
+		 );
+
+	return result;
 }
 
 void print_char(char c)
@@ -90,7 +107,7 @@ void printdec(int x)
 void kprintf(const char* format, ...)
 {
     int arg = 0;
-	unsigned *value = (unsigned*)&format + 1;
+	unsigned *value = (unsigned*)(&format)+1;
     while (*format)
     {
         unsigned val = *value;
@@ -142,4 +159,12 @@ void kprintf(const char* format, ...)
         format++;
 		value++;
     }
+}
+
+int kstrcmp(const char* a, const char* b)
+{
+	while (*a != 0 && *b != 0 && *a == *b)
+		a++, b++;
+
+	return a-b;
 }

@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("MIPS.Debugger")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("MIPS Debugger")]
+[assembly: AssemblyDescription("Written by Josh Wyant - Joshwyant91@gmail.com")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft")]
-[assembly: AssemblyProduct("MIPS.Debugger")]
-[assembly: AssemblyCopyright("Copyright © Microsoft 2012")]
+[assembly: AssemblyCompany("Josh Wyant")]
+[assembly: AssemblyProduct("MIPS Debugger")]
+[assembly: AssemblyCopyright("Copyright © Josh Wyant 2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

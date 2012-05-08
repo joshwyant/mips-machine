@@ -9,10 +9,10 @@
 #define false 0
 #endif
 
-
-extern void main();
-void __start();
 void kprintf(const char* format, ...);
 void println(char *str);
+int getint();
+void printdec(int);
+int kstrcmp(const char* a, const char* b);
 
 #endif

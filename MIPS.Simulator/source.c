@@ -1,17 +1,35 @@
 ﻿#include "syscalls.h"
 
+int fibonacci(int n);
+
 void main()
 {
-	int i = 0;
-	int j = 0;
-	for (i = 0; i < 10; i++)
-		j += i;
+	int count, i;
 
-	println("Hello, world!");
+	kprintf("Fibonacci numbers!\nHow many? ");
 
-	if (false)
-		println("True!!");
-	else
-		println("False!!");
+	count = getint();
+
+	while (count != 0)
+	{
+		kprintf("\nOk, printing "); kprintf("%d", count); kprintf(" fibonacci numbers:\n");
+	
+		for (i = 1; i <= count; i++)
+		{
+			kprintf("%d ", fibonacci(i));
+		}
+
+		kprintf("\n\nHow many? ");
+		count = getint();
+	}
+
+	kprintf("\nHasta luego!");
 }
 
+int fibonacci(int n)
+{
+	if (n == 1 || n == 2)
+	    return 1;
+
+	return fibonacci(n - 1) + fibonacci(n - 2);
+}

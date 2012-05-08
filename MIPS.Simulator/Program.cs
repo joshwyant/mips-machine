@@ -19,26 +19,31 @@ namespace MIPS.Simulator
         [STAThread]
         static void Main()
         {
-            Console.WriteLine("Hypothetical Machine Simulator based on MIPS, written by Josh Wyant");
-
             // Create a program
             var toolchain = new ElfToolchain(path, prefix);
             var lib = new[] { "syscalls.c" };
             var sources = new[] { "source.c" };
-            toolchain.ExecuteTool("gcc", string.Format("-o {0} {1}", program, string.Join(" ", sources.Union(lib))));
+            var bigEndian = true;
+            toolchain.ExecuteTool("gcc", string.Format("-E{2} -o {0} {1}", program, string.Join(" ", sources.Union(lib)), bigEndian ? "B" : "L"));
 
             // Create a new MIPS machine with 32MB of RAM.
-            Machine mips = new Machine(32); 
+            Machine mips = new Machine(32);
 
             // Map the stack and video memory
             mips.Memory.Map(0x7FFF0000, 0xFFFFFFFC, 0x00C00000); // Stack
             mips.Memory.Map(0x80000000, 0x007FFFFC, 0x00100000); // Video memory
 
             // Load the program
-            mips.LoadElf(program, 0x00800000);
+            var elf = mips.LoadElf(program, 0x00800000);
+
+            var debugForm = new DebugForm(mips, elf);
+
+            //debugForm.Debugger.BreakAt("kprintf");
+
+            //debugForm.AutoRun = true;
 
             Application.EnableVisualStyles();
-            Application.Run(new DebugForm(mips));
+            Application.Run(debugForm);
         }
     }
 }

@@ -441,6 +441,15 @@ namespace MIPS.Architecture
                                                                        }, 
                                                                        OpCode.jal
                                                                     ),
+                                                                    // MIPS III Instructions
+                                                                    new InstructionDefinition(
+                                                                       "ddivu", 
+                                                                       new InstructionArgumentType[] { 
+                                                                           InstructionArgumentType.Rs,
+                                                                           InstructionArgumentType.Rt
+                                                                       }, 
+                                                                       OpCode.ddivu
+                                                                    ),
                                                                }.ToDictionary(id => id.Name);
         #endregion
 

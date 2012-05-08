@@ -14,10 +14,12 @@ namespace MIPS.Architecture
         /// <param name="m"></param>
         /// <param name="filename"></param>
         /// <param name="offset">The physical offset in memory to begin loading.</param>
-        public unsafe static void LoadElf(this Machine m, string filename, uint offset)
+        public unsafe static IELF LoadElf(this Machine m, string filename, uint offset)
         {
             // Load the ELF
             var elf = ELFReader.Load(filename) as ELF<uint>;
+
+            m.Memory.IsBigEndian = (elf.Endianess == Endianess.BigEndian);
 
             // Set the entry point
             m.CPU.PC = (uint*)elf.EntryPoint;
@@ -41,6 +43,8 @@ namespace MIPS.Architecture
                     m.Memory[((int)header.Address + i) >> 2] = word;
                 }
             }
+
+            return elf;
         }
     }
 }

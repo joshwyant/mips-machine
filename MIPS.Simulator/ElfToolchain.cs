@@ -8,6 +8,11 @@ namespace MIPS.Simulator
 {
     class ElfToolchain
     {
+        public class GCCCompileError : Exception
+        {
+            public GCCCompileError(string message) : base(message) { }
+        }
+
         public string Prefix { get; set; }
 
         public ElfToolchain(string path, string prefix)
@@ -23,12 +28,15 @@ namespace MIPS.Simulator
             psi.RedirectStandardOutput = true;
             psi.RedirectStandardError = true;
             psi.UseShellExecute = false;
+            psi.CreateNoWindow = true;
 
             var p = Process.Start(psi);
 
-            //Console.Write(p.StandardOutput.ReadToEnd());
             var error = p.StandardError.ReadToEnd();
-            Console.Write(error);
+            if (!string.IsNullOrEmpty(error))
+            {
+                throw new GCCCompileError(error);
+            }
         }
     }
 }
