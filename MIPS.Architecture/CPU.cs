@@ -201,6 +201,8 @@ namespace MIPS.Architecture
                     WorkerThread.Join();
                 }
             }
+
+            BreakPoints.Clear();
         }
 
         /// <summary>
@@ -588,11 +590,6 @@ namespace MIPS.Architecture
                 // Store Word Right
                 case OpCode.swr:
                     throw new NotImplementedException();
-                // MIPS III Instruction Doubleword Divide Unsigned
-                case OpCode.ddivu:
-                    Low = RF[IR.Rs] / RF[IR.Rt];
-                    High = RF[IR.Rs] % RF[IR.Rt];
-                    break;
                 default:
                     throw new NotImplementedException();
             }

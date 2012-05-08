@@ -28,7 +28,7 @@ namespace MIPS.Architecture
             }
         }
 
-        public List<Tuple<int, int, int>> Mappings;
+        public List<Tuple<uint, uint, uint>> Mappings;
 
         /// <summary>
         /// This is the physical memory, in little-endian.
@@ -45,14 +45,16 @@ namespace MIPS.Architecture
             {
                 unsafe
                 {
-                    return RawMemory[Mappings.Where(m => m.Item1 <= index && m.Item2 >= index).Select(m => index - m.Item1 + m.Item3).Single()];
+                    var i = (uint)index;
+                    return RawMemory[Mappings.Where(m => m.Item1 <= i && m.Item2 >= i).Select(m => i - m.Item1 + m.Item3).Single()];
                 }
             }
             set
             {
                 unsafe
                 {
-                    RawMemory[Mappings.Where(m => m.Item1 <= index && m.Item2 >= index).Select(m => index - m.Item1 + m.Item3).Single()] = value;
+                    var i = (uint)index;
+                    RawMemory[Mappings.Where(m => m.Item1 <= i && m.Item2 >= i).Select(m => i - m.Item1 + m.Item3).Single()] = value;
                 }
             }
         }
@@ -63,13 +65,13 @@ namespace MIPS.Architecture
             {
                 RawMemory = (uint*)System.Runtime.InteropServices.Marshal.AllocHGlobal(memoryInMB << 20);
             }
-            Mappings = new List<Tuple<int, int, int>>();
+            Mappings = new List<Tuple<uint, uint, uint>>();
             IsBigEndian = false;
         }
 
         public void Map(uint startVirtualAddress, uint lastVirtualAddress, uint startPhysicalAddress)
         {
-            Mappings.Add(new Tuple<int,int,int>((int)(startVirtualAddress >> 2), (int)(lastVirtualAddress >> 2), (int)(startPhysicalAddress >> 2)));
+            Mappings.Add(new Tuple<uint,uint,uint>(startVirtualAddress >> 2, lastVirtualAddress >> 2, startPhysicalAddress >> 2));
         }
 
         #region Byte ordering and word fetching
@@ -110,15 +112,15 @@ namespace MIPS.Architecture
 
             // Return word-aligned addresses faster
             if (offset == 0)
-                return this[(int)addr >> 2];
+                return this[(int)(addr >> 2)];
 
             // Get the first part of the word
-            var word = this[(int)addr >> 2] >> (offset * 8);
+            var word = this[(int)(addr >> 2)] >> (offset * 8);
 
             // Do we have to fetch the next word?
             if ((offset + wordLength) > 4)
             {
-                word |= this[((int)addr >> 2) + 1] << ((4 - offset) * 8);
+                word |= this[(int)(addr >> 2) + 1] << ((4 - offset) * 8);
             }
 
             // Return our byte-aligned word.
@@ -132,7 +134,7 @@ namespace MIPS.Architecture
         {
             // Get the byte offset, and the index
             var offset = (int)(addr % 4);
-            var index = (int)addr >> 2;
+            var index = (int)(addr >> 2);
 
             // Set word-aligned addresses faster
             if (offset == 0 && wordLength == 4)

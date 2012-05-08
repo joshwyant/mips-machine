@@ -457,15 +457,15 @@
             // cToolStripMenuItem
             // 
             this.cToolStripMenuItem.Name = "cToolStripMenuItem";
-            this.cToolStripMenuItem.Size = new System.Drawing.Size(146, 24);
+            this.cToolStripMenuItem.Size = new System.Drawing.Size(152, 24);
             this.cToolStripMenuItem.Text = "C";
             this.cToolStripMenuItem.Click += new System.EventHandler(this.cToolStripMenuItem_Click);
             // 
             // mIPSAssemblerToolStripMenuItem
             // 
             this.mIPSAssemblerToolStripMenuItem.Name = "mIPSAssemblerToolStripMenuItem";
-            this.mIPSAssemblerToolStripMenuItem.Size = new System.Drawing.Size(146, 24);
-            this.mIPSAssemblerToolStripMenuItem.Text = "MIPS ASM";
+            this.mIPSAssemblerToolStripMenuItem.Size = new System.Drawing.Size(152, 24);
+            this.mIPSAssemblerToolStripMenuItem.Text = "ASM";
             this.mIPSAssemblerToolStripMenuItem.Click += new System.EventHandler(this.mIPSAssemblerToolStripMenuItem_Click);
             // 
             // toolStripButtonCompile

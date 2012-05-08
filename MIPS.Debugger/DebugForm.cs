@@ -35,6 +35,10 @@ namespace MIPS.Debugger
         public bool AutoRun { get; set; }
 
         string loadedProgram;
+
+        public long lastElapsed { get; set; }
+
+        public VideoForm VideoForm { get; set; }
         #endregion
 
         #region Constructors
@@ -43,6 +47,13 @@ namespace MIPS.Debugger
             InitializeComponent();
 
             Debugger = new MIPS.Architecture.Debugger(machine, elf);
+
+            // Add event handlers
+            Debugger.Machine.CPU.CPUStep += new EventHandler(CPU_CPUStep);
+            Debugger.Machine.CPU.BreakpointHit += new EventHandler(CPU_BreakpointHit);
+            Debugger.Machine.CPU.BreakpointHit += new EventHandler(CPU_CPUStep);
+            Debugger.Machine.CPU.Paused += new EventHandler(CPU_CPUStep);
+            Debugger.Machine.CPU.Syscall += new EventHandler(CPU_Syscall);
 
             UpdateDebugInfo();
 
@@ -203,12 +214,6 @@ namespace MIPS.Debugger
 
         private void UpdateDebugInfo()
         {
-            Debugger.Machine.CPU.CPUStep += new EventHandler(CPU_CPUStep);
-            Debugger.Machine.CPU.BreakpointHit += new EventHandler(CPU_BreakpointHit);
-            Debugger.Machine.CPU.BreakpointHit += new EventHandler(CPU_CPUStep);
-            Debugger.Machine.CPU.Paused += new EventHandler(CPU_CPUStep);
-            Debugger.Machine.CPU.Syscall += new EventHandler(CPU_Syscall);
-
             checkedListBox1.Items.Clear();
             checkedListBox1.Items.AddRange(Debugger.MethodSymbols.OrderBy(kvp => kvp.Key).Select(kvp => (object)kvp.Key).ToArray());
         }
@@ -238,6 +243,11 @@ namespace MIPS.Debugger
 
             // Exit disassembly mode
             ExitDisassemblyMode();
+
+            if (VideoForm != null && VideoForm.Created)
+            {
+                VideoForm.Close();
+            }
         }
         #endregion
 
@@ -255,6 +265,21 @@ namespace MIPS.Debugger
                 Stop();
 
                 textBoxProgram.Text = System.IO.File.ReadAllText(openFileDialog.FileName);
+
+                var fi = new FileInfo(openFileDialog.FileName);
+                switch (fi.Extension.ToLowerInvariant())
+                {
+                    case ".asm":
+                    case ".s":
+                        EditorLanguage = Language.ASM;
+                        toolStripSplitButtonLanguage.Text = "Language: ASM";
+                        break;
+                    case ".c":
+                    case ".cxx":
+                        EditorLanguage = Language.C;
+                        toolStripSplitButtonLanguage.Text = "Language: C";
+                        break;
+                }
 
                 tabControl1.SelectedTab = tabPageEdit;
             }
@@ -322,6 +347,41 @@ namespace MIPS.Debugger
                 // Exit
                 case 10:
                     return;
+                // Video Syscall
+                case 100:
+                    var retval = 0;
+                    switch (RF[(int)Register.a0])
+                    {
+                        case 0:
+                            VideoForm = new VideoForm();
+
+                            VideoForm.Show();
+                            break;
+                        case 1:
+                            // Get the bytes from memory.
+                            uint videomem = 0x80000000;
+
+                            byte[] buffer = new byte[1024 * 768 * 4];
+
+                            for (int i = 0; i < 1024 * 768; i++)
+                            {
+                                var bytes = BitConverter.GetBytes(Debugger.Machine.Memory.GetWord(videomem + (uint)i * 4));
+
+                                Buffer.BlockCopy(bytes, 0, buffer, i * 4, 4);
+                            }
+
+                            VideoForm.UpdateScreen(buffer);
+
+                            break;
+                        case 2:
+                            var r = new Random(Environment.TickCount);
+
+                            retval = r.Next();
+                            break;
+                    }
+
+                    RF[(int)Register.v0] = (uint)retval;
+                    break;
             }
             Machine.CPU.SyscallSync.Set();
         }
@@ -430,6 +490,13 @@ namespace MIPS.Debugger
             checkedItems.ToList().ForEach(s => Debugger.BreakAt(s));
             notChecked.ToList().ForEach(s => Debugger.RemoveBreakPoint(s));
         }
+
+        private void timerIPS_Tick(object sender, EventArgs e)
+        {
+            var currentElapsed = Debugger.Machine.CPU.Elapsed;
+            toolStripStatusLabelIPS.Text = string.Format("IPS: {0}", currentElapsed - lastElapsed);
+            lastElapsed = currentElapsed;
+        }
         #endregion
 
         #region Build
@@ -437,23 +504,30 @@ namespace MIPS.Debugger
         {
             if (!string.IsNullOrWhiteSpace(textBoxProgram.Text))
             {
-                Stop();
-
-                // Un-map all the memory and just map the video memory and stack.
-                Debugger.Machine.Memory.Mappings.Clear();
-                Debugger.Machine.Memory.Map(0x7FFF0000, 0xFFFFFFFC, 0x00C00000); // Stack
-                Debugger.Machine.Memory.Map(0x80000000, 0x007FFFFC, 0x00100000); // Video memory
-
-                if (EditorLanguage == Language.ASM)
+                try
                 {
-                    BuildASMProgram();
-                }
-                else if (EditorLanguage == Language.C)
-                {
-                    BuildCxxProgram();
-                }
+                    Stop();
 
-                Run();
+                    // Un-map all the memory and just map the video memory and stack.
+                    Debugger.Machine.Memory.Mappings.Clear();
+                    Debugger.Machine.Memory.Map(0x7FFF0000, 0x7FFFFFFC, 0x00C00000); // Stack
+                    Debugger.Machine.Memory.Map(0x80000000, 0x807FFFFC, 0x00100000); // Video memory
+
+                    if (EditorLanguage == Language.ASM)
+                    {
+                        BuildASMProgram();
+                    }
+                    else if (EditorLanguage == Language.C)
+                    {
+                        BuildCxxProgram();
+                    }
+
+                    Run();
+                }
+                catch (ElfToolchain.GCCCompileError ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
             }
         }
 
@@ -495,10 +569,10 @@ namespace MIPS.Debugger
 
             // Create a program
             var toolchain = new ElfToolchain(path, prefix);
-            var lib = new[] { "syscalls.c" };
+            var lib = new[] { "syscalls.c", "video.c", "math.c" };
             var sources = new[] { "editor.c" };
-            toolchain.ExecuteTool("gcc", string.Format("-o {0} -EL {1}", program, string.Join(" ", sources.Union(lib))));
-
+            var bigEndian = false;
+            toolchain.ExecuteTool("gcc", string.Format("-mips1 -E{2} -o {0} {1}", program, string.Join(" ", sources.Union(lib)), bigEndian ? "B" : "L"));
             var mips = Debugger.Machine;
 
             // Load the program
@@ -528,14 +602,5 @@ namespace MIPS.Debugger
             EditorLanguage = Language.ASM;
         }
         #endregion
-
-        private void timerIPS_Tick(object sender, EventArgs e)
-        {
-            var currentElapsed = Debugger.Machine.CPU.Elapsed;
-            toolStripStatusLabelIPS.Text = string.Format("IPS: {0}", currentElapsed - lastElapsed);
-            lastElapsed = currentElapsed;
-        }
-
-        public long lastElapsed { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
+using System.IO;
 
 namespace MIPS.Simulator
 {
@@ -17,7 +18,9 @@ namespace MIPS.Simulator
 
         public ElfToolchain(string path, string prefix)
         {
-            Environment.SetEnvironmentVariable("PATH", string.Format("{0};{1}", path, Environment.GetEnvironmentVariable("PATH")), EnvironmentVariableTarget.Process);
+            var dir = new DirectoryInfo(path);
+
+            Environment.SetEnvironmentVariable("PATH", string.Format("\"{0}\";{1}", dir.FullName, Environment.GetEnvironmentVariable("PATH")), EnvironmentVariableTarget.Process);
             Prefix = prefix;
         }
 

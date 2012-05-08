@@ -24,6 +24,13 @@ namespace MIPS.Architecture
             // Set the entry point
             m.CPU.PC = (uint*)elf.EntryPoint;
 
+            // Set the global area pointer
+            var gp = bswap(elf.Endianess == Endianess.BigEndian,
+                BitConverter.ToUInt32(elf.Sections.Single(s => s.Name == ".reginfo").GetContents(), 20)
+            );
+
+            m.CPU.RF[(int)Register.gp] = gp;
+
             // Load all the program headers
             foreach (var header in elf.ProgramHeaders.Where(ph => ph.Type == ProgramHeaderType.Load))
             {
@@ -45,6 +52,14 @@ namespace MIPS.Architecture
             }
 
             return elf;
+        }
+
+        static uint bswap(bool isBigEndian, uint value)
+        {
+            if (isBigEndian && !BitConverter.IsLittleEndian)
+                return value;
+            else
+                return (value >> 24) | ((value & 0x00FF0000) >> 8) | ((value & 0x0000FF00) << 8) | (value << 24);
         }
     }
 }

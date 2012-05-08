@@ -31,8 +31,8 @@ int getint()
 
 	// Get integer syscall
 	asm ("li $v0, 5\n\t"
-		 "addu %0, $0, $v0\n\t"
-		 "syscall"
+		 "syscall\n\t"
+		 "addu %0, $0, $v0"
 		 : "=r" (result)
 		 : : "v0"
 		 );

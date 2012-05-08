@@ -9,7 +9,7 @@ namespace MIPS.Simulator
 {
     static class Program
     {
-        const string path = @"C:\Program Files (x86)\CodeSourcery\Sourcery_CodeBench_Lite_for_MIPS_ELF\bin";
+        const string path = @"..\..\..\gcc-bin";
         const string prefix = "mips-sde-elf";
         const string program = "program.elf";
 
@@ -24,14 +24,14 @@ namespace MIPS.Simulator
             var lib = new[] { "syscalls.c" };
             var sources = new[] { "source.c" };
             var bigEndian = true;
-            toolchain.ExecuteTool("gcc", string.Format("-E{2} -o {0} {1}", program, string.Join(" ", sources.Union(lib)), bigEndian ? "B" : "L"));
+            toolchain.ExecuteTool("gcc", string.Format("-mips1 -E{2} -o {0} {1}", program, string.Join(" ", sources.Union(lib)), bigEndian ? "B" : "L"));
 
             // Create a new MIPS machine with 32MB of RAM.
             Machine mips = new Machine(32);
 
             // Map the stack and video memory
-            mips.Memory.Map(0x7FFF0000, 0xFFFFFFFC, 0x00C00000); // Stack
-            mips.Memory.Map(0x80000000, 0x007FFFFC, 0x00100000); // Video memory
+            mips.Memory.Map(0x7FFF0000, 0x7FFFFFFC, 0x00C00000); // Stack
+            mips.Memory.Map(0x80000000, 0x807FFFFC, 0x00100000); // Video memory
 
             // Load the program
             var elf = mips.LoadElf(program, 0x00800000);

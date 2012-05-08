@@ -20,7 +20,7 @@ namespace MIPS.Debugger
         {
             var dir = new DirectoryInfo(path);
 
-            Environment.SetEnvironmentVariable("PATH", string.Format("{0};{1}", dir.FullName, Environment.GetEnvironmentVariable("PATH")), EnvironmentVariableTarget.Process);
+            Environment.SetEnvironmentVariable("PATH", string.Format("\"{0}\";{1}", dir.FullName, Environment.GetEnvironmentVariable("PATH")), EnvironmentVariableTarget.Process);
             Prefix = prefix;
         }
 

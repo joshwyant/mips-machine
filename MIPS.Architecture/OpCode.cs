@@ -118,9 +118,5 @@
         /// Store Word Right
         /// </summary>
         swr = 0x2E,
-        /// <summary>
-        /// MIPS III Instruction Doubleword Divide Unsigned
-        /// </summary>
-        ddivu = 0x1F,
     }
 }
