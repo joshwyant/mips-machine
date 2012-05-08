@@ -18,7 +18,19 @@ namespace MIPS.Debugger
 
             this.DoubleBuffered = true;
 
+            this.FormClosing += new FormClosingEventHandler(VideoForm_FormClosing);
+
             ScreenBuffer = new Bitmap(1024, 1024, System.Drawing.Imaging.PixelFormat.Format32bppRgb);
+
+            using (var g = Graphics.FromImage(ScreenBuffer))
+            {
+                g.Clear(Color.Black);
+            }
+        }
+
+        void VideoForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            ScreenBuffer.Dispose();
         }
 
         private void VideoForm_Load(object sender, EventArgs e)

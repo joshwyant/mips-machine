@@ -9,16 +9,19 @@ namespace MIPS.Architecture
     {
         public Machine Machine;
         public ELFSharp.ELF<uint> Elf;
-        public Dictionary<string, uint> MethodSymbols;
+        public Dictionary<string, uint> MethodSymbols = new Dictionary<string,uint>();
 
         public Debugger(Machine machine, ELFSharp.IELF elf)
         {
             Machine = machine;
             Elf = elf as ELFSharp.ELF<uint>;
 
-            var symtab = elf.GetSection(".symtab") as ELFSharp.SymbolTable<uint>;
+            if (elf != null)
+            {
+                var symtab = elf.GetSection(".symtab") as ELFSharp.SymbolTable<uint>;
 
-            MethodSymbols = symtab.Entries.Where(e => e.Type == ELFSharp.SymbolType.Function).ToDictionary(e => e.Name, e => e.Value);
+                MethodSymbols = symtab.Entries.Where(e => e.Type == ELFSharp.SymbolType.Function).ToDictionary(e => e.Name, e => e.Value);
+            }
         }
 
         public unsafe string ExecutingFunction

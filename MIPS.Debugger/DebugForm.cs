@@ -127,7 +127,7 @@ namespace MIPS.Debugger
 
         private void toolStripButtonRun_Click(object sender, EventArgs e)
         {
-            Run();
+            BuildCode();
         }
 
         private void toolStripButtonSingleStep_Click(object sender, EventArgs e)
@@ -476,7 +476,7 @@ namespace MIPS.Debugger
                     }
                     else if (!Debugger.Machine.CPU.IsRunning)
                     {
-                        Run();
+                        BuildCode();
                     }
                     break;
             }
