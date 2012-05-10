@@ -16,11 +16,8 @@ namespace MIPS.Debugger
 
         public string Prefix { get; set; }
 
-        public ElfToolchain(string path, string prefix)
+        public ElfToolchain(string prefix)
         {
-            var dir = new DirectoryInfo(path);
-
-            Environment.SetEnvironmentVariable("PATH", string.Format("\"{0}\";{1}", dir.FullName, Environment.GetEnvironmentVariable("PATH")), EnvironmentVariableTarget.Process);
             Prefix = prefix;
         }
 

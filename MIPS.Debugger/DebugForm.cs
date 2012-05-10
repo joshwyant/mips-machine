@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using MIPS.Architecture;
 using System.IO;
+using System.Configuration;
 
 namespace MIPS.Debugger
 {
@@ -558,8 +559,7 @@ namespace MIPS.Debugger
 
         private void BuildCxxProgram()
         {
-            const string path = @"..\..\..\gcc-bin";
-            const string prefix = "mips-sde-elf";
+            string prefix = ConfigurationManager.AppSettings["GCCPrefix"];
             var program = string.Format("p-{0}.elf", Guid.NewGuid());
 
             loadedProgram = program;
@@ -568,10 +568,11 @@ namespace MIPS.Debugger
             System.IO.File.WriteAllText("editor.c", textBoxProgram.Text);
 
             // Create a program
-            var toolchain = new ElfToolchain(path, prefix);
+            var toolchain = new ElfToolchain(prefix);
             var lib = new[] { "syscalls.c", "video.c", "math.c" };
             var sources = new[] { "editor.c" };
             var bigEndian = false;
+
             toolchain.ExecuteTool("gcc", string.Format("-mips1 -E{2} -o {0} {1}", program, string.Join(" ", sources.Union(lib)), bigEndian ? "B" : "L"));
             var mips = Debugger.Machine;
 

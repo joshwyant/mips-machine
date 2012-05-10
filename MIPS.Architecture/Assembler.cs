@@ -292,6 +292,8 @@ namespace MIPS.Architecture
 
         public void MarkSymbolReference(string symbol, SymbolReferenceType type)
         {
+            // The SymbolReference constructor automatically
+            // initializes the section and the offset.
             References.Add(new SymbolReference(this) { Name = symbol, Type = type });
         }
 
